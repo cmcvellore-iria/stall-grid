@@ -1,274 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>CMC Stall Grid Passport – IRIA 2025</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CMC Stall Grid Passport – IRIA 2025</title>
 
-  <!-- EXPECTED ASSETS in ./assets:
-       - chapel-hero.jpg
-       - cmc.png
-       - iria2025.png
-  -->
+<!-- html5-qrcode -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-  <style>
-    /* ----------------- BASE & MOBILE VH FIX ----------------- */
-    :root{ --vh:1vh; }
-    html,body{height:100%}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial; margin:0; color:#f8fafc; background:#020617; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow-x:hidden;}
-    /* set --vh to work around mobile browser chrome */
-    .fix-h-screen{height:calc(var(--vh) * 100); min-height:calc(var(--vh) * 100);}
+<style>
+  /* reset & base */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:#020617;
+    color:#f8fafc;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
+  }
 
-    /* ----------------- HERO BACKGROUND (fixed, slightly lighter) ----------------- */
-    body::before{
-      content:"";
-      position:fixed; inset:0;
-      background: url("assets/chapel-hero.jpg") center center / cover no-repeat;
-      z-index:-3;
-      background-attachment: fixed;
-      transform: scale(1.02);
-    }
-    body::after{
-      content:""; position:fixed; inset:0; z-index:-2;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.02) 5%, rgba(0,0,0,0.16) 92%);
-    }
+  /* hero background - chapel, slightly brighter */
+  .hero-wrap{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .hero-bg{
+    position:fixed;
+    inset:0;
+    background: url("assets/chapel-hero.jpg") center center / cover no-repeat;
+    filter: brightness(1.10); /* +10% brighter */
+    z-index:-3;
+    background-attachment: fixed;
+  }
+  /* subtle dark overlay to keep text readable but let chapel show */
+  .hero-overlay{
+    position:fixed; inset:0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.02) 10%, rgba(0,0,0,0.18) 92%);
+    z-index:-2;
+  }
 
-    /* ----------------- LAYOUT PANELS & TRANSITIONS ----------------- */
-    section.panel{ position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:0 1.2rem 18vh; text-align:center; overflow:hidden; opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s ease; }
-    section.panel.active{ opacity:1; transform:translateY(0); }
+  /* top fixed logos and title */
+  .top-bar{
+    position:fixed; left:0; right:0; top:0; height:112px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; z-index:40; pointer-events:none;
+  }
+  .top-bar .logo{pointer-events:auto}
+  .logo img{height:72px; transform:scale(1.15);} /* +15% */
+  .hero-title{
+    position:fixed; left:50%; transform:translateX(-50%); top:72px; z-index:40;
+    text-align:center; pointer-events:none;
+  }
+  .hero-title .main{font-weight:700;font-size:1.45rem;color:#0b2338}
+  .hero-title .sub{font-size:0.95rem;opacity:0.95;color:#0b2338;margin-top:6px}
 
-    /* ----------------- LOGOS & FIXED HERO TITLE ----------------- */
-    .logo-row{
-      position:fixed; left:0; right:0; top:1rem; z-index:60;
-      display:flex; justify-content:space-between; align-items:center; padding:0 1.2rem; pointer-events:none;
-    }
-    .logo-row img{ height:83px; pointer-events:auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6)); } /* ~15% larger */
-    .hero-title-wrap{
-      position:fixed; top:5rem; left:50%; transform:translateX(-50%); z-index:55; text-align:center; pointer-events:none; transition:opacity .45s ease, transform .45s ease;
-    }
-    .hero-title-main{ font-weight:700; font-size:1.18rem; text-shadow:0 2px 8px rgba(0,0,0,0.6); }
-    .hero-title-sub{ font-size:0.92rem; margin-top:0.18rem; opacity:0.95; }
+  /* pond-level glass area (two frosted boxes) */
+  .glass-zone{
+    position:relative;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    padding-top:60vh; /* keep them low on the screen (pond level) */
+    padding-bottom:6vh;
+  }
 
-    /* class applied to fade the fixed title away */
-    .hero-title-wrap.hidden { opacity:0; transform:translate(-50%,-6px); }
+  .glass{
+    width:min(1100px,94%);
+    max-width:1100px;
+    background: rgba(255,255,255,0.18);
+    border-radius:14px;
+    padding:22px 28px;
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    border:1px solid rgba(255,255,255,0.22);
+    box-shadow:0 10px 38px rgba(0,0,0,0.45);
+    color:#031026;
+    transform:translateY(28px);
+    opacity:0;
+    transition:opacity .9s cubic-bezier(.2,.9,.2,1), transform .9s cubic-bezier(.2,.9,.2,1);
+  }
+  .glass.revealed{ transform:translateY(0); opacity:1; }
 
-    /* ----------------- HERO GLASS BOXES (floating near pond level) ----------------- */
-    .hero-inner { position:relative; z-index:50; width:100%; max-width:980px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:12px; padding-bottom:12vh; pointer-events:auto; }
-    .hero-glass { width:92%; max-width:760px; background:rgba(255,255,255,0.18); backdrop-filter: blur(10px); border-radius:14px; border:1px solid rgba(255,255,255,0.36); box-shadow:0 18px 50px rgba(0,0,0,0.6); padding:12px 16px; color:#031026; transform:translateY(18px); opacity:0; transition:opacity .9s ease, transform .9s ease; }
+  /* more transparent but readable text within */
+  .verse { font-style:italic; font-family:"Times New Roman",serif; font-size:1.05rem; line-height:1.6; color:rgba(5,25,30,0.92); text-align:center; }
+  .verse-ref{ display:block; margin-top:10px; font-size:0.9rem; opacity:0.92 }
 
-    /* Verse style uses Times New Roman slightly italic */
-    .verse-block{ font-family:"Times New Roman",serif; font-style:italic; font-size:1rem; line-height:1.45; }
-    .verse-ref{ display:block; margin-top:6px; font-size:0.86rem; opacity:0.92; }
+  .ida-title{ font-family:"Times New Roman",serif; font-weight:600; text-align:center; font-size:1.02rem; margin-bottom:6px; color:#031026; }
+  .ida-preview{ font-family:"Times New Roman",serif; font-size:0.98rem; color:rgba(3,16,34,0.95); text-align:center; }
 
-    .ida-title{ font-family:"Times New Roman",serif; font-style:italic; font-size:0.95rem; margin-top:6px; }
-    .ida-preview{ font-family:"Times New Roman",serif; font-style:italic; font-size:0.92rem; opacity:0.96; margin-top:6px; }
+  .hero-actions{ margin-top:8px; display:flex; gap:12px; justify-content:center; align-items:center; pointer-events:auto }
+  .link-btn{ padding:10px 16px; border-radius:999px; border:1px solid rgba(255,255,255,0.6); background:rgba(9,14,21,0.24); color:#f1f9ff; cursor:pointer; font-weight:600 }
+  .scroll-hint{ margin-left:12px; color:rgba(2,10,20,0.7); cursor:pointer; opacity:0.95 }
 
-    /* Entrance animation: they come in one after another (delays set via JS) */
-    .hero-glass.enter { opacity:1; transform:translateY(0); }
+  /* passport area (stalls + auth + leaderboard) */
+  .passport{
+    background:transparent;
+    padding:48px 18px 80px;
+  }
+  .content-wrap{ max-width:1040px; width:96%; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
 
-    .hero-actions { margin-top:10px; display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .auth-card, .grid-card{ background:rgba(255,255,255,0.12); border-radius:14px; padding:18px; border:1px solid rgba(255,255,255,0.14); backdrop-filter: blur(8px); color:#eaf7ff; box-shadow:0 12px 36px rgba(0,0,0,0.45) }
 
-    .link-button { padding:9px 14px; border-radius:999px; border:1px solid rgba(255,255,255,0.7); background:rgba(15,23,42,0.36); color:#eef2ff; cursor:pointer; font-weight:600; }
-    .link-button:hover{ transform:translateY(-2px); }
+  .auth-top{ display:flex; justify-content:space-between; align-items:center; gap:12px }
+  .pill{ display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(9,14,21,0.48); font-size:12px; letter-spacing:0.12em; color:#eaf7ff }
 
-    .scroll-to-contest { margin-top:6px; font-size:0.82rem; letter-spacing:0.16em; cursor:pointer; color:#eaf5ff; display:inline-flex; align-items:center; gap:8px; }
-    .scroll-to-contest .arrow{ font-size:1.2rem; animation:bounce 1.6s infinite; }
-    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+  input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(200,210,220,0.12); background:rgba(3,6,10,0.45); color:#eef7ff; margin-top:10px; font-size:0.95rem }
 
-    /* ----------------- CONTEST CARD ----------------- */
-    .contest-card{ width:92%; max-width:820px; background:rgba(255,255,255,0.12); backdrop-filter:blur(10px); border-radius:16px; border:1px solid rgba(255,255,255,0.22); padding:18px; box-shadow:0 18px 55px rgba(0,0,0,0.8); text-align:left; color:#e8f6ff; }
-    .pill{ display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(9,14,21,0.72); font-size:12px; letter-spacing:.16em; color:#e6eef9; border:1px solid rgba(200,210,230,0.12); }
-    .contest-card h2{ font-size:1.28rem; margin:10px 0; }
+  .auth-buttons{ display:flex; gap:10px; margin-top:12px }
+  .btn-register{ background:#9ad3bc; color:#043024; padding:10px 14px; border-radius:999px; border:none; cursor:pointer }
+  .btn-login{ background:#8bbcea; color:#06253b; padding:10px 14px; border-radius:999px; border:none; cursor:pointer }
+  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.12); padding:8px 12px; border-radius:999px; color:#eaf7ff; cursor:pointer }
 
-    /* ----------------- PASSPORT / AUTH / GRID ----------------- */
-    #passport{ align-items:flex-start; padding-top:18vh; }
-    .content-wrap{ width:96%; max-width:1024px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
-    .auth-card,.grid-card{ background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); border-radius:14px; border:1px solid rgba(255,255,255,0.12); padding:14px; box-shadow:0 14px 36px rgba(0,0,0,0.6); color:#eef6ff; }
-    .auth-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    .auth-title{ font-weight:700; }
+  .grid-container{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; margin-top:12px }
+  .neon-stall{ padding:12px; border-radius:12px; background: radial-gradient(circle at top,#071025,#02101a 85%); border:1px solid rgba(34,211,238,0.48); color:#a8f6ff; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 10px 24px rgba(10,40,60,0.55); transition: transform 160ms ease, box-shadow 160ms ease }
+  .neon-stall:hover{ transform: translateY(-4px); box-shadow:0 18px 36px rgba(10,40,60,0.75) }
+  .neon-stall.visited{ border-color:rgba(74,222,128,0.95); background: linear-gradient(180deg,#032a16,#011212); color:#dfffe6 }
 
-    input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(180,190,220,0.12); background:rgba(6,10,16,0.65); color:#eef2ff; margin-top:8px; font-size:0.95rem; }
-    input::placeholder{ color:rgba(209,213,219,0.7); }
+  /* leaderboard */
+  #leaderboard{ margin-top:14px }
+  #leader-list{ margin-top:8px; font-size:0.92rem; color:#e8f6ff; max-height:260px; overflow:auto; padding-right:6px; text-align:left }
+  #leader-list .row{ display:flex; justify-content:space-between; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.03) }
 
-    .auth-buttons{ display:flex; gap:10px; margin-top:12px; }
-    .btn-register{ background:rgba(154,211,188,0.95); color:#043024; padding:10px 14px; border-radius:999px; border:none; font-weight:700; cursor:pointer; }
-    .btn-login{ background:rgba(139,188,230,0.95); color:#06253b; padding:10px 14px; border-radius:999px; border:none; font-weight:700; cursor:pointer; }
-    .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.12); color:#eef2ff; padding:8px 12px; border-radius:999px; cursor:pointer; }
+  /* QR overlay */
+  #qr-overlay{ position:fixed; inset:0; background:rgba(2,6,12,0.92); display:none; align-items:center; justify-content:center; z-index:130; padding:18px }
+  #qr-reader{ width:360px; max-width:96%; background:#000; border-radius:12px; overflow:hidden }
 
-    .hint{ font-size:0.86rem; opacity:0.94; margin-top:8px; color:rgba(235,245,255,0.9); }
+  /* toast */
+  #toast{ position:fixed; left:50%; transform:translateX(-50%) translateY(12px); bottom:28px; background:#021021; color:#e9f9ff; padding:10px 16px; border-radius:999px; opacity:0; pointer-events:none; z-index:200; transition:opacity .28s,transform .28s }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
 
-    /* GRID */
-    .grid-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px; }
-    .grid-container{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-top:10px; }
-    .neon-stall{ padding:12px; border-radius:12px; background: radial-gradient(circle at top,#071025,#02101a 85%); border:1px solid rgba(34,211,238,0.48); color:#a8f6ff; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 10px 24px rgba(10,40,60,0.55); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-    .neon-stall:hover{ transform:translateY(-6px); box-shadow:0 24px 48px rgba(8,36,60,0.85); }
-    .neon-stall.pop { transform:scale(1.03); }
-    .neon-stall.visited{ border-color:rgba(74,222,128,0.95); box-shadow:0 18px 36px rgba(20,60,40,0.6); background:linear-gradient(180deg,#032a16,#011212); color:#ccffd6; }
+  /* small helpers */
+  .hidden{ display:none !important }
 
-    /* LEADERBOARD */
-    #leaderboard{ margin-top:12px; }
-    .leader-header{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    #leader-list{ margin-top:8px; font-size:0.92rem; color:#e8f6ff; max-height:280px; overflow:auto; text-align:left; }
-    #leader-list .row{ display:flex; justify-content:space-between; padding:10px 6px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  @media(max-width:820px){
+    .logo img{height:56px}
+    .hero-title .main{ font-size:1.25rem }
+    .glass{ padding:18px }
+    .hero-bg{ background-position: center 22% }
+  }
+  @media(max-width:420px){
+    .hero-title{ top:62px }
+    .verse{ font-size:0.95rem }
+  }
 
-    .btn-refresh { background:rgba(139,188,230,0.95); color:#06253b; padding:8px 12px; border-radius:999px; border:none; cursor:pointer; }
+  /* mobile vh fix */
+  :root{ --vh:1vh }
+  .fix-h{ height: calc(var(--vh) * 100) }
 
-    /* QR overlay */
-    #qr-overlay{ position:fixed; inset:0; background:rgba(2,6,12,0.92); display:none; align-items:center; justify-content:center; z-index:150; padding:18px; }
-    #qr-reader{ width:360px; max-width:96%; background:#000; border-radius:12px; overflow:hidden; }
-
-    /* Prayer modal (bright, frosted) */
-    #prayer-modal{ position:fixed; inset:0; background:rgba(3,6,12,0.65); display:none; align-items:center; justify-content:center; z-index:160; padding:16px; }
-    .prayer-card{ max-width:700px; width:100%; background:rgba(255,255,255,0.92); color:#021024; padding:18px; border-radius:12px; box-shadow:0 24px 60px rgba(0,0,0,0.95); max-height:80vh; overflow:auto; font-family:"Times New Roman",serif; font-style:italic; }
-
-    /* Toast */
-    #toast{ position:fixed; left:50%; transform:translateX(-50%) translateY(12px); bottom:28px; background:#021021; color:#e9f9ff; padding:10px 16px; border-radius:999px; opacity:0; pointer-events:none; z-index:200; transition:opacity .28s, transform .28s; }
-    #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-    /* small screens */
-    @media(max-width:820px){
-      .logo-row img{ height:64px }
-      .hero-title-wrap{ top:4.2rem; }
-      .neon-stall{ padding:10px }
-      .hero-glass{ width:94%; }
-    }
-    @media(max-width:420px){
-      .hero-title-main{ font-size:1rem }
-      .verse-block{ font-size:0.96rem }
-    }
-
-    /* utilities */
-    .hidden{ display:none !important; }
-  </style>
-
-  <!-- html5-qrcode -->
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</style>
 </head>
-<body class="fix-h-screen">
+<body>
 
-  <!-- LOGOS (fixed) -->
-  <div class="logo-row">
-    <div style="pointer-events:auto"><img src="assets/iria2025.png" alt="IRIA Logo"></div>
-    <div style="pointer-events:auto"><img src="assets/cmc.png" alt="CMC Logo"></div>
+  <!-- hero background + overlays -->
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <!-- top logos & title (fixed) -->
+  <div class="top-bar" role="banner">
+    <div class="logo left logo-row" style="pointer-events:auto">
+      <img src="assets/iria2025.png" alt="IRIA">
+    </div>
+    <div class="logo right logo-row" style="pointer-events:auto">
+      <img src="assets/cmc.png" alt="CMC">
+    </div>
   </div>
 
-  <!-- HERO TITLE (fixed top middle) -->
-  <div class="hero-title-wrap" id="hero-title">
-    <div class="hero-title-main">Welcome to the 78th Annual TNPY IRIA Conference</div>
-    <div class="hero-title-sub">at Christian Medical College, Vellore</div>
+  <div class="hero-title" aria-hidden="true">
+    <div class="main">Welcome to the 78th Annual TNPY IRIA Conference</div>
+    <div class="sub">at Christian Medical College, Vellore</div>
   </div>
 
-  <!-- HERO PANEL -->
-  <section id="hero" class="panel" style="align-items:flex-end; padding-bottom:18vh;">
-    <div class="hero-inner" id="hero-inner">
+  <!-- hero visible area (main initial viewport) -->
+  <main class="hero-wrap fix-h" id="hero">
+    <!-- empty - background shows -->
+    <div style="width:100%;height:1px"></div>
+  </main>
 
-      <!-- Verse glass (low, pond-level) -->
-      <div class="hero-glass" id="verse-glass" aria-hidden="false">
-        <div class="verse-block">
-          “Even as the Son of man came not to be ministered unto, but to minister,
-          and to give his life a ransom for many.”
-          <span class="verse-ref">Matthew 20:28</span>
-        </div>
+  <!-- glass zone (pond-level) - two boxes -->
+  <section class="glass-zone" id="glass-zone">
+    <div class="glass" id="verseGlass" aria-hidden="false">
+      <div class="verse">“Even as the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many.”<span class="verse-ref">Matthew 20:28</span></div>
+    </div>
+
+    <div class="glass" id="idaGlass" aria-hidden="false">
+      <div class="ida-title">Aunt Ida’s Prayer</div>
+      <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
+      <div class="hero-actions" style="justify-content:center">
+        <button class="link-btn" id="openPrayerBtn">Read the full prayer</button>
+        <div class="scroll-hint" id="scrollToPassport">Scroll to start the Stall Grid Contest ↓</div>
       </div>
-
-      <!-- Ida glass (follows verse) -->
-      <div class="hero-glass" id="ida-glass" style="transition-delay:0.12s">
-        <div class="ida-title">Aunt Ida’s Prayer</div>
-        <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
-
-        <div class="hero-actions">
-          <button class="link-button" onclick="openPrayerModal()">Read the full prayer</button>
-          <div class="scroll-to-contest" onclick="scrollToContest()">
-            Scroll to start the Stall Grid Contest
-            <span class="arrow">↓</span>
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
 
-  <!-- CONTEST INTRO -->
-  <section id="contest" class="panel">
-    <div class="contest-card">
-      <div class="pill">Stall Grid Contest</div>
-      <h2>Explore, Scan & Win at IRIA 2025</h2>
-      <p>
-        During the 78<sup>th</sup> Annual TNPY IRIA Conference at CMC Vellore,
-        the Stall Grid Passport turns your visit to the trade area into an Apple-like
-        interactive challenge. Collect digital ticks by scanning QR codes at each stall.
-      </p>
-      <p><strong>How it works:</strong></p>
-      <ul>
-        <li>Register once with your email and a password (on Render backend).</li>
-        <li>Login on your phone or tablet — your session is kept locally.</li>
-        <li>Tap a stall tile and scan the secure QR at that exhibitor’s stall.</li>
-        <li>Backend verifies HMAC token & expiry and records the visit.</li>
-        <li>Your total visited stalls update the live leaderboard on this page.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- PASSPORT / AUTH / GRID -->
-  <section id="passport" class="panel">
+  <!-- passport / stalls / auth -->
+  <section id="passport" class="passport panel">
     <div class="content-wrap">
 
-      <!-- AUTH CARD -->
       <div class="auth-card" id="auth-card">
         <div class="auth-top">
           <div>
             <div class="pill">Delegate Login</div>
-            <div class="auth-title">Access Your Stall Grid Passport</div>
+            <div style="font-size:1rem;font-weight:700;margin-top:6px">Access Your Stall Grid Passport</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <div id="auth-status">Not signed in</div>
-            <div id="logout-btn" class="hidden"><button class="btn-ghost" onclick="logoutUser()">Logout</button></div>
+            <div id="logout-wrap" class="hidden"><button class="btn-ghost" id="logoutBtn">Logout</button></div>
           </div>
         </div>
 
-        <input id="name-input" placeholder="Full name (for registration)" />
-        <input id="email-input" placeholder="Email (for login)" />
+        <input id="name-input" placeholder="Name (as registration)" autocomplete="name" />
+        <input id="email-input" placeholder="Email (same as registration)" autocomplete="email" />
         <input id="delegate-input" placeholder="Delegate ID (optional)" />
-        <input id="password-input" type="password" placeholder="Password" />
+        <input id="password-input" type="password" placeholder="Password" autocomplete="current-password"/>
 
         <div class="auth-buttons">
-          <button class="btn-register" onclick="registerUser()">Register</button>
-          <button class="btn-login" onclick="loginUser()">Login</button>
+          <button class="btn-register" id="registerBtn">Register</button>
+          <button class="btn-login" id="loginBtn">Login</button>
+          <button class="btn-ghost" id="forgotBtn">Forgot?</button>
         </div>
-
-        <p class="hint">
-          Use the same name and email as your conference registration to be eligible for prizes.
-          Choose a password different from your email password.
-        </p>
+        <p style="margin-top:12px;font-size:0.9rem;color:rgba(235,245,255,0.9)">Use the same name and email as your conference registration to be eligible for prizes.</p>
       </div>
 
-      <!-- GRID & LEADERBOARD (hidden until login) -->
       <div class="grid-card hidden" id="grid-card">
-        <div class="grid-header">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <div class="pill">Stall Grid</div>
             <div style="font-size:0.98rem;font-weight:600;margin-top:6px;">Scan QR at Each Exhibitor</div>
-            <p style="font-size:0.85rem;opacity:0.95;margin-top:6px;">Tap a stall tile to open the camera. After scanning, the stall will glow and your visit counts towards the live leaderboard.</p>
+            <p style="font-size:0.88rem;opacity:0.95;margin-top:6px;">Tap a stall tile to open the camera. After scanning, your visit will be recorded and reflected on the leaderboard.</p>
           </div>
+          <div><button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button></div>
         </div>
 
-        <div id="user-banner" class="welcome-line hidden" style="font-weight:700;"></div>
+        <div id="user-banner" style="margin-top:10px;font-weight:700" class="hidden"></div>
 
-        <div id="grid" class="grid-container" aria-live="polite"></div>
+        <div id="grid" class="grid-container" aria-live="polite" style="margin-top:12px"></div>
 
-        <div id="leaderboard" style="margin-top:16px;">
-          <div class="leader-header">
+        <div id="leaderboard" style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
               <div class="pill">Leaderboard</div>
               <div style="font-size:0.95rem;font-weight:600;margin-top:6px;">Most Active Stall Explorers</div>
             </div>
-            <button class="btn-refresh" onclick="manualRefreshLeaderboard()">Refresh</button>
           </div>
-          <div id="leader-list" role="list"></div>
-        </div>
-
-        <div style="margin-top:10px;text-align:center;">
-          <div class="scroll-to-contest" onclick="scrollToLeaderboard()">Scroll down for leaderboard <span class="arrow">↓</span></div>
+          <div id="leader-list"></div>
         </div>
       </div>
 
@@ -278,439 +260,427 @@
   <!-- QR overlay -->
   <div id="qr-overlay" aria-hidden="true">
     <div id="qr-reader"></div>
-    <button id="qr-close" onclick="closeScanner()" style="margin-top:12px;padding:8px 12px;border-radius:999px;border:none;background:#0b1726;color:#e7f6ff;">Close</button>
+    <div style="margin-top:12px"><button class="btn-ghost" id="qr-close">Close</button></div>
   </div>
 
-  <!-- Prayer modal -->
-  <div id="prayer-modal" aria-hidden="true">
-    <div class="prayer-card">
-      <h3>Aunt Ida’s Prayer</h3>
-      <p>Father, whose life is within me,</p>
-      <p>and whose love is ever about me,</p>
-      <p>Grant that Thy life may be maintained in my life today and every day,</p>
-      <p>as with gladness of heart, without haste or confusion of thought,</p>
-      <p>I go about my daily tasks,</p>
-      <p>conscious of the ability to meet every rightful demand,</p>
-      <p>seeing the larger meaning of little things,</p>
-      <p>and finding beauty and love everywhere.</p>
-      <p>In the sense of Thy presence, may I walk through the hours,</p>
-      <p>breathing the atmosphere of love rather than anxious striving...</p>
-      <p style="margin-top:8px;">— Dr. Ida S. Scudder</p>
-      <div style="text-align:right;margin-top:8px"><button class="link-button" onclick="closePrayerModal()">Close</button></div>
+  <!-- prayer modal -->
+  <div id="prayer-modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,12,0.7);z-index:220;padding:12px">
+    <div style="background:rgba(255,255,255,0.98);color:#031025;padding:18px;border-radius:12px;max-width:720px;max-height:82vh;overflow:auto">
+      <h3 style="font-family:Times New Roman,serif;font-style:italic">Aunt Ida’s Prayer</h3>
+      <div style="font-family:Times New Roman,serif;font-style:italic;line-height:1.5">
+        Father, whose life is within me, and whose love is ever about me...
+        <p style="margin-top:8px">... (full prayer text here)</p>
+      </div>
+      <div style="text-align:right;margin-top:8px"><button class="link-btn" id="closePrayerBtn">Close</button></div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="toast" role="status"></div>
 
-  <script type="module">
-    /******************************************************************
-     * Final frontend (Render-only backend)
-     * BASE URL (confirmed): https://cmc-iria-secure.onrender.com
-     ******************************************************************/
-    const BASE = "https://cmc-iria-secure.onrender.com";
+<script type="module">
+/* ---------- MOBILE VH FIX ---------- */
+function setRealVH(){
+  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+}
+setRealVH();
+window.addEventListener('resize', setRealVH);
+window.addEventListener('orientationchange', setRealVH);
 
-    /* ---------- MOBILE VH FIX ---------- */
-    function setRealVH(){ document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); }
-    setRealVH();
-    window.addEventListener('resize', setRealVH);
-    window.addEventListener('orientationchange', setRealVH);
+/* ---------- CONFIG ---------- */
+const API_BASE = 'https://cmc-iria-secure.onrender.com'; // your Render backend
+const DEFAULT_STALL_COUNT = 15; // change if you have a different number
 
-    /* ---------- ELEMENTS ---------- */
-    const panels = document.querySelectorAll('section.panel');
-    const heroTitle = document.getElementById('hero-title');
-    const verseGlass = document.getElementById('verse-glass');
-    const idaGlass = document.getElementById('ida-glass');
-    const heroInner = document.getElementById('hero-inner');
+/* ---------- ELEMENTS ---------- */
+const verseGlass = document.getElementById('verseGlass');
+const idaGlass = document.getElementById('idaGlass');
+const scrollToPassport = document.getElementById('scrollToPassport');
+const heroTitle = document.querySelector('.hero-title');
+const authCard = document.getElementById('auth-card');
+const gridCard = document.getElementById('grid-card');
+const gridEl = document.getElementById('grid');
+const leaderListEl = document.getElementById('leader-list');
+const userBanner = document.getElementById('user-banner');
+const authStatus = document.getElementById('auth-status');
+const logoutWrap = document.getElementById('logout-wrap');
+const qrOverlay = document.getElementById('qr-overlay');
+const qrReader = document.getElementById('qr-reader');
+const toastEl = document.getElementById('toast');
 
-    const authCard = document.getElementById('auth-card');
-    const gridCard = document.getElementById('grid-card');
-    const authStatus = document.getElementById('auth-status');
-    const userBanner = document.getElementById('user-banner');
-    const logoutBtn = document.getElementById('logout-btn');
+/* inputs/buttons */
+const nameInput = document.getElementById('name-input');
+const emailInput = document.getElementById('email-input');
+const passInput = document.getElementById('password-input');
+const delegateInput = document.getElementById('delegate-input');
+const registerBtn = document.getElementById('registerBtn');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const forgotBtn = document.getElementById('forgotBtn');
+const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn');
+const openPrayerBtn = document.getElementById('openPrayerBtn');
+const closePrayerBtn = document.getElementById('closePrayerBtn');
 
-    const nameInput = document.getElementById('name-input');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
-    const delegateInput = document.getElementById('delegate-input');
+const openScannerButtons = {}; // stallName -> handler
 
-    const gridEl = document.getElementById('grid');
-    const leaderListEl = document.getElementById('leader-list');
+/* ---------- STATE ---------- */
+let jwtToken = localStorage.getItem('jwt') || null;
+let delegateId = localStorage.getItem('delegateId') || null;
+let currentName = localStorage.getItem('name') || null;
 
-    const qrOverlay = document.getElementById('qr-overlay');
-    const toastEl = document.getElementById('toast');
-    const prayerModal = document.getElementById('prayer-modal');
+/* ---------- TOAST ---------- */
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  toastEl.style.opacity = '1';
+  setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.style.opacity='0' },2200);
+}
 
-    /* ---------- SIMPLE UI HELPERS ---------- */
-    function showToast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'),2200); }
-    function showError(msg){ alert(msg); }
+/* ---------- AUTH helpers ---------- */
+async function apiFetch(path, opts = {}){
+  const headers = opts.headers || {};
+  headers['Content-Type'] = 'application/json';
+  if(jwtToken) headers['Authorization'] = 'Bearer ' + jwtToken;
+  opts.headers = headers;
+  opts.credentials = 'omit';
+  try{
+    const res = await fetch(API_BASE + path, opts);
+    const txt = await res.text();
+    let data;
+    try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
+    if(!res.ok) throw data || {error:'Request failed', status: res.status};
+    return data;
+  }catch(e){
+    throw e;
+  }
+}
 
-    /* ---------- ANIMATIONS: activate panels on scroll ---------- */
-    const panelObserver = new IntersectionObserver((entries)=>{
-      entries.forEach(entry => {
-        if(entry.isIntersecting) entry.target.classList.add('active');
-      });
-    }, {threshold:0.28});
-    panels.forEach(p => panelObserver.observe(p));
+/* ---------- REGISTER / LOGIN ---------- */
+registerBtn?.addEventListener('click', async ()=>{
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
+  if(!email || !pass){ alert('Email and password are required'); return; }
+  try{
+    const payload = { email, password: pass, name };
+    const data = await apiFetch('/api/signup', { method:'POST', body: JSON.stringify(payload) });
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    currentName = data.name || name || email;
+    localStorage.setItem('jwt', jwtToken);
+    localStorage.setItem('delegateId', delegateId);
+    localStorage.setItem('name', currentName);
+    showToast('Registered & signed in');
+    updateUIForAuth();
+    await loadUserVisitsAndLeaderboard();
+    gridCard.classList.remove('hidden');
+    document.getElementById('passport').scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    console.error(e);
+    alert(e && e.error ? e.error : (e.message||String(e)));
+  }
+});
 
-    /* ---------- APPLE-LIKE HERO BEHAVIOUR ---------- */
-    // Boxes animate in one after another when hero visible; when user scrolls to contest, fade title and glass
-    const contestEl = document.getElementById('contest');
-    const contestObserver = new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{
-        if(entry.isIntersecting){
-          // fade hero title away
-          heroTitle.classList.add('hidden');
-          // fade hero glass gently upward (already part of CSS)
-          verseGlass.classList.remove('enter');
-          idaGlass.classList.remove('enter');
-        }else{
-          heroTitle.classList.remove('hidden');
-          // animate glass entrance (one after another)
-          setTimeout(()=>verseGlass.classList.add('enter'), 200);
-          setTimeout(()=>idaGlass.classList.add('enter'), 420);
-        }
-      });
-    }, {threshold: 0.22});
-    if(contestEl) contestObserver.observe(contestEl);
+loginBtn?.addEventListener('click', async ()=>{
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
+  if(!email || !pass){ alert('Enter email and password'); return; }
+  try{
+    const data = await apiFetch('/api/login', { method:'POST', body: JSON.stringify({ email, password: pass }) });
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    currentName = data.name || email;
+    localStorage.setItem('jwt', jwtToken);
+    localStorage.setItem('delegateId', delegateId);
+    localStorage.setItem('name', currentName);
+    showToast('Logged in');
+    updateUIForAuth();
+    gridCard.classList.remove('hidden');
+    await loadUserVisitsAndLeaderboard();
+    document.getElementById('passport').scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    console.error(e);
+    alert(e && e.error ? e.error : (e.message||String(e)));
+  }
+});
 
-    // initial entry on load
-    window.addEventListener('load', ()=> {
-      // ensure hero title visible then animate glass in slightly delayed
-      setTimeout(()=>verseGlass.classList.add('enter'), 500);
-      setTimeout(()=>idaGlass.classList.add('enter'), 780);
+logoutBtn?.addEventListener('click', ()=>{
+  jwtToken = null;
+  delegateId = null;
+  currentName = null;
+  localStorage.removeItem('jwt'); localStorage.removeItem('delegateId'); localStorage.removeItem('name');
+  updateUIForAuth();
+  gridCard.classList.add('hidden');
+  clearVisitedStalls();
+  leaderListEl.innerHTML = '';
+  showToast('Logged out');
+});
+
+/* forgot password - will call /api/request-reset if available (optional) */
+forgotBtn?.addEventListener('click', async ()=>{
+  const email = emailInput.value.trim();
+  if(!email){ alert('Enter the email used to register'); return; }
+  try{
+    // many backends implement request-reset; this will attempt it but gracefully report errors
+    const resp = await apiFetch('/api/request-reset', { method:'POST', body: JSON.stringify({ email }) });
+    alert('If your email exists, a reset token was generated. Follow instructions.');
+  }catch(e){
+    // backend may not have this endpoint - show instructive message
+    console.warn('reset not supported', e);
+    alert('Reset token endpoint not available on backend. You can ask admin to reset password on the server.');
+  }
+});
+
+/* ---------- UI state update ---------- */
+function updateUIForAuth(){
+  if(jwtToken && delegateId){
+    authStatus.textContent = `Signed in as ${currentName || delegateId}`;
+    logoutWrap.classList.remove('hidden');
+    authCard.classList.add('hidden');
+    gridCard.classList.remove('hidden');
+    userBanner.classList.remove('hidden');
+    userBanner.textContent = `Welcome, ${currentName || delegateId}${delegateId ? ' (ID: ' + delegateId + ')' : ''}`;
+  }else{
+    authStatus.textContent = 'Not signed in';
+    logoutWrap.classList.add('hidden');
+    authCard.classList.remove('hidden');
+    gridCard.classList.add('hidden');
+    userBanner.classList.add('hidden');
+  }
+}
+
+/* ---------- STALL GRID (static generation) ---------- */
+function createStallCard(id){
+  const div = document.createElement('div');
+  div.className = 'neon-stall';
+  div.dataset.stallId = id;
+  div.innerHTML = `<div style="font-size:0.95rem">${id}</div><div style="font-size:0.78rem;opacity:0.9">Tap to scan</div>`;
+  div.addEventListener('click', ()=>openScanner(id));
+  gridEl.appendChild(div);
+}
+function buildGrid(count = DEFAULT_STALL_COUNT){
+  gridEl.innerHTML = '';
+  for(let i=1;i<=count;i++){
+    createStallCard('Stall ' + i);
+  }
+}
+
+/* ---------- VISITS / LEADERBOARD ---------- */
+async function loadUserVisitsAndLeaderboard(){
+  try{
+    if(jwtToken && delegateId){
+      // load visits
+      const v = await apiFetch(`/api/visits/${delegateId}`, { method:'GET' });
+      // v expected { visits: [stallNumbers] } (depends on your backend)
+      if(v && v.visits){
+        // mark visited stalls
+        const set = new Set(v.visits.map(x=>String(x)));
+        document.querySelectorAll('.neon-stall').forEach(card=>{
+          const sid = card.dataset.stallId;
+          // server uses numeric stall (like 1) — if your visits are numbers, ensure we match; support both
+          const numeric = sid.replace(/[^0-9]/g,'');
+          if(set.has(sid) || set.has(numeric)){
+            card.classList.add('visited');
+            card.innerHTML = `<div style="font-size:0.95rem">${sid} ✓</div><div style="font-size:0.78rem;opacity:0.9">Visited</div>`;
+          }
+        });
+      }
+    }
+  }catch(e){
+    console.warn('loadUserVisits failed', e);
+  }
+  // always refresh leaderboard
+  await loadLeaderboard();
+}
+
+async function loadLeaderboard(){
+  leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.9)">Loading…</div>';
+  try{
+    const data = await apiFetch('/api/leaderboard', { method:'GET' });
+    const rows = data && data.top ? data.top : (Array.isArray(data) ? data : []);
+    if(!rows || rows.length===0){ leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.7)">No visits recorded yet.</div>'; return; }
+    leaderListEl.innerHTML = '';
+    rows.forEach((r,i)=>{
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `<div style="font-weight:700">${i+1}. ${r.name || r.delegateId}</div><div style="opacity:0.9">${r.count || r.cnt || r.counts || 0} stall${(r.count||r.cnt||0)===1 ? '' : 's'}</div>`;
+      leaderListEl.appendChild(row);
     });
+  }catch(e){
+    console.error('Leaderboard error', e);
+    leaderListEl.innerHTML = '<div style="padding:8px 0;color:#ffdddd">Error loading leaderboard.</div>';
+  }
+}
 
-    /* ---------- AUTH (JWT stored in localStorage) ---------- */
-    let JWT = localStorage.getItem('cmc_jwt') || null;
-    let CURRENT_USER = JSON.parse(localStorage.getItem('cmc_user') || 'null'); // {name, email, delegateId}
+/* ---------- QR SCAN ---------- */
+let html5QrInstance = null;
+let currentStallName = null;
 
-    function persistAuth(token, user){
-      JWT = token;
-      CURRENT_USER = user;
-      localStorage.setItem('cmc_jwt', token);
-      localStorage.setItem('cmc_user', JSON.stringify(user));
-    }
-    function clearAuth(){
-      JWT = null;
-      CURRENT_USER = null;
-      localStorage.removeItem('cmc_jwt');
-      localStorage.removeItem('cmc_user');
-    }
-
-    async function registerUser(){
-      const name = nameInput.value.trim();
-      const email = emailInput.value.trim();
-      const pass = passwordInput.value.trim();
-      const del = delegateInput.value.trim();
-      if(!name || !email || !pass){ showError('Name, email and password required'); return; }
-      try{
-        const r = await fetch(BASE + '/api/signup', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ name, email, password: pass, delegateId: del || undefined })
-        });
-        const j = await r.json();
-        if(!r.ok){ showError(j.error || 'Could not register'); return; }
-        persistAuth(j.token, { name: j.name, email: j.email, delegateId: j.delegateId });
-        showToast('Registered & signed in');
-        onSignedIn();
-      }catch(e){
-        console.error(e); showError('Registration failed');
-      }
-    }
-    window.registerUser = registerUser;
-
-    async function loginUser(){
-      const email = emailInput.value.trim();
-      const pass = passwordInput.value.trim();
-      if(!email || !pass){ showError('Enter email & password'); return; }
-      try{
-        const r = await fetch(BASE + '/api/login', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ email, password: pass })
-        });
-        const j = await r.json();
-        if(!r.ok){ showError(j.error || 'Login failed'); return; }
-        persistAuth(j.token, { name: j.name, email: j.email, delegateId: j.delegateId });
-        showToast('Logged in');
-        onSignedIn();
-      }catch(e){
-        console.error(e); showError('Login failed');
-      }
-    }
-    window.loginUser = loginUser;
-
-    async function logoutUser(){
-      clearAuth();
-      authStatus.textContent = 'Not signed in';
-      authCard.classList.remove('hidden');
-      gridCard.classList.add('hidden');
-      userBanner.classList.add('hidden');
-      logoutBtn.classList.add('hidden');
-      clearVisitedStalls();
-      leaderListEl.innerHTML = '';
-      showToast('Logged out');
-    }
-    window.logoutUser = logoutUser;
-
-    async function validateExistingSession(){
-      if(!JWT || !CURRENT_USER) return;
-      // attempt to fetch visits for the delegate to verify token
-      try{
-        const r = await fetch(BASE + `/api/visits/${CURRENT_USER.delegateId}`, { headers:{ 'Authorization': `Bearer ${JWT}` }});
-        if(r.status === 401){
-          clearAuth();
-          return;
-        }
-        if(!r.ok) {
-          // still treat as signed in but try to rebuild
-        }
-        onSignedIn();
-      }catch(e){
-        console.warn('session check failed',e);
-        clearAuth();
-      }
-    }
-
-    function onSignedIn(){
-      if(!CURRENT_USER || !JWT) return;
-      authStatus.textContent = `Signed in as ${CURRENT_USER.name || CURRENT_USER.email}`;
-      authCard.classList.add('hidden');
-      gridCard.classList.remove('hidden');
-      userBanner.textContent = CURRENT_USER.delegateId ? `Welcome, ${CURRENT_USER.name} (Delegate ID: ${CURRENT_USER.delegateId})` : `Welcome, ${CURRENT_USER.name}`;
-      userBanner.classList.remove('hidden');
-      logoutBtn.classList.remove('hidden');
-      // build grid, load visits, leaderboard
-      buildGridFromServer();
-      loadUserVisits(CURRENT_USER.delegateId).catch(()=>{});
-      loadLeaderboard().catch(()=>{});
-    }
-
-    /* ---------- GRID: try fetching stalls from backend first, fallback to default ---------- */
-    async function buildGridFromServer(){
-      gridEl.innerHTML = '';
-      try{
-        const r = await fetch(BASE + '/api/stalls'); // optional endpoint; many backends won't have it
-        if(r.ok){
-          const arr = await r.json();
-          if(Array.isArray(arr) && arr.length){
-            arr.forEach(s => createStallCard({ name: s.name || s.id }));
-            return;
-          }
-        }
-      }catch(e){ /* ignore */ }
-
-      // fallback: default number (dynamic later)
-      const TOTAL = 15;
-      for(let i=1;i<=TOTAL;i++) createStallCard({ name: `Stall ${i}` });
-    }
-
-    function createStallCard(stall){
-      const div = document.createElement('div');
-      div.className = 'neon-stall';
-      div.dataset.stallId = stall.name;
-      div.innerHTML = `<div style="font-size:0.96rem">${stall.name}</div><div style="font-size:0.76rem;opacity:0.9">Tap to scan</div>`;
-      div.addEventListener('click', ()=> openScanner(stall.name));
-      // neon pop on hover is preserved by CSS .neon-stall:hover
-      gridEl.appendChild(div);
-    }
-
-    function clearVisitedStalls(){
-      document.querySelectorAll('.neon-stall').forEach(c => {
-        c.classList.remove('visited');
-        c.innerHTML = `<div style="font-size:0.96rem">${c.dataset.stallId}</div><div style="font-size:0.76rem;opacity:0.9">Tap to scan</div>`;
-      });
-    }
-
-    function markStallVisited(stallName){
-      document.querySelectorAll('.neon-stall').forEach(card=>{
-        if(card.dataset.stallId === stallName){
-          card.classList.add('visited');
-          card.innerHTML = `<div style="font-size:0.96rem">${stallName} ✓</div><div style="font-size:0.76rem;opacity:0.9">Visited</div>`;
-        }
-      });
-    }
-
-    /* ---------- LOAD USER VISITS ---------- */
-    async function loadUserVisits(delegateId){
-      if(!delegateId || !JWT) return;
-      try{
-        const r = await fetch(BASE + `/api/visits/${delegateId}`, { headers:{ 'Authorization': `Bearer ${JWT}` }});
-        if(r.status === 401){ clearAuth(); showError('Session expired, please login again.'); return; }
-        const j = await r.json();
-        if(j && Array.isArray(j.visits)){
-          clearVisitedStalls();
-          j.visits.forEach(s => markStallVisited(String(s)));
-        }
-      }catch(e){
-        console.error('loadUserVisits', e);
-      }
-    }
-
-    /* ---------- QR SCANNER (html5-qrcode) ---------- */
-    let html5QrInstance = null;
-    let currentStall = null;
-
-    async function openScanner(stallName){
-      if(!JWT || !CURRENT_USER){ alert('Please login first to record visits.'); return; }
-      currentStall = stallName;
-      qrOverlay.style.display = 'flex';
-      const regionId = 'qr-reader';
-      if(!html5QrInstance) html5QrInstance = new Html5Qrcode(regionId);
-
-      // stop if running
-      try{ await html5QrInstance.stop(); }catch(_){}
-      try{
-        await html5QrInstance.start(
-          { facingMode: { exact: "environment" } }, // try back camera first
-          { fps: 10, qrbox: 250 },
-          async (decodedText) => {
-            // decodedText is expected to be string payload produced by gen_qrs.js
-            try{ await html5QrInstance.stop(); }catch(_){}
-            qrOverlay.style.display = 'none';
-            // parse payload: either querystring style or plain stall token piece
-            const parsed = parseQrPayload(decodedText);
-            if(!parsed){ showError('Unrecognised QR format'); return; }
-            // server expects body: { stall, token, exp } (it uses JWT to know who is scanning)
-            await verifyWithServer(parsed.stall, parsed.token, parsed.exp);
-          },
-          (errorMessage) => {
-            // ignore decode failures
-          }
-        );
-      }catch(err){
+async function openScanner(stallName){
+  if(!jwtToken || !delegateId){ alert('Please login first to record visits.'); return; }
+  currentStallName = stallName;
+  qrOverlay.style.display = 'flex';
+  const regionId = 'qr-reader';
+  try{
+    if(!html5QrInstance) html5QrInstance = new Html5Qrcode(regionId);
+    // ensure previous stopped
+    try{ await html5QrInstance.stop(); }catch(_){}
+    await html5QrInstance.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      async (decodedText) => {
+        // decodedText expected format: "stall=5&delegate=D12345&exp=...&token=abcdef..."
+        try{ await html5QrInstance.stop(); }catch(_){}
         qrOverlay.style.display = 'none';
-        showError('Camera error: ' + (err.message||err));
-      }
+        await handleDecodedQR(decodedText);
+      },
+      (err)=>{ /* ignore decode failures */ }
+    );
+  }catch(err){
+    qrOverlay.style.display = 'none';
+    alert('Camera error: ' + (err.message||err));
+  }
+}
+
+async function closeScanner(){
+  qrOverlay.style.display = 'none';
+  if(html5QrInstance){
+    try{ await html5QrInstance.stop(); }catch(_){}
+  }
+}
+
+function parseQueryString(qs){
+  const out = {};
+  qs.split('&').forEach(pair=>{
+    const [k,v] = pair.split('=');
+    if(k) out[decodeURIComponent(k)] = decodeURIComponent(v||'');
+  });
+  return out;
+}
+
+async function handleDecodedQR(decoded){
+  // If the QR contains a full URL with query params, extract the query part
+  let q = decoded;
+  try{
+    const u = new URL(decoded);
+    q = u.search.slice(1);
+  }catch(_){}
+  // Now parse `stall=...&delegate=...&exp=...&token=...`
+  const parts = parseQueryString(q);
+  const stall = parts.stall || currentStallName || parts.stallId;
+  const token = parts.token || parts.sig || parts.signature;
+  const exp = parts.exp || parts.expiry;
+  if(!stall || !token || !exp){
+    alert('Invalid QR payload. Make sure this QR was generated by the event system.');
+    return;
+  }
+
+  // POST to /api/verify with Authorization Bearer <jwt>
+  try{
+    const body = { stall: Number(stall) || stall, token, exp };
+    const res = await apiFetch('/api/verify', { method:'POST', body: JSON.stringify(body) });
+    // server returns {ok:true} on success (per your server)
+    if(res && res.ok){
+      // mark local UI
+      markStallVisited(stall);
+      showToast(`Recorded visit: ${stall}`);
+      await loadUserVisitsAndLeaderboard();
+    }else{
+      // if response contains error message
+      showToast('Verification failed');
+      console.warn('verify response', res);
+      alert((res && res.error) ? res.error : 'Verification failed');
     }
-    window.openScanner = openScanner;
+  }catch(e){
+    console.error('verify failed', e);
+    alert(e && e.error ? e.error : (e.message||String(e)));
+  }
+}
 
-    function closeScanner(){
-      qrOverlay.style.display = 'none';
-      if(html5QrInstance){
-        html5QrInstance.stop().catch(()=>{});
-      }
+/* ---------- UI helpers ---------- */
+function clearVisitedStalls(){
+  document.querySelectorAll('.neon-stall').forEach(c=>{
+    c.classList.remove('visited');
+    c.innerHTML = `<div style="font-size:0.95rem">${c.dataset.stallId}</div><div style="font-size:0.78rem;opacity:0.9">Tap to scan</div>`;
+  });
+}
+function markStallVisited(stallName){
+  document.querySelectorAll('.neon-stall').forEach(card=>{
+    if(card.dataset.stallId === stallName || card.dataset.stallId.endsWith(String(stallName))){
+      card.classList.add('visited');
+      card.innerHTML = `<div style="font-size:0.95rem">${card.dataset.stallId} ✓</div><div style="font-size:0.78rem;opacity:0.9">Visited</div>`;
     }
-    window.closeScanner = closeScanner;
+  });
+}
 
-    function parseQrPayload(txt){
-      // expected formats:
-      // 1) querystring: "stall=5&delegate=D123&exp=170...&token=abc"
-      // 2) direct "stall=5&exp=..&token=.."
-      if(!txt) return null;
-      // try to split key=val pairs
-      try{
-        // sometimes QR libraries include line breaks; trim
-        const t = txt.trim();
-        // If payload looks like a URL, extract query
-        let qs = t;
-        if(t.includes('?') && (t.includes('http') || t.includes('https'))) qs = t.split('?').slice(1).join('?');
-        const params = {};
-        qs.split('&').forEach(pair=>{
-          const [k,v] = pair.split('=');
-          if(k) params[k] = decodeURIComponent((v||'').replace(/\+/g,' '));
-        });
-        if(params.stall && params.token && params.exp){
-          return { stall: params.stall, token: params.token, exp: params.exp, delegate: params.delegate||null };
-        }
-        // fallback: if decoded text is just a number / stall name, return that (not secure)
-        if(/^stall\s*\d+$/i.test(t) || /^\d+$/.test(t)) {
-          // insecure fallback — should not be used with secure token requirement
-          const stall = t.match(/\d+/)[0];
-          return { stall, token: null, exp: null };
-        }
-        return null;
-      }catch(e){ console.warn('parseQrPayload',e); return null; }
+/* ---------- INTERSECTION / ANIMATION BEHAVIOR ---------- */
+/* Make hero title fade away after small scroll; reveal glass boxes in sequence */
+const glassZone = document.getElementById('glass-zone');
+const glassBoxes = [verseGlass, idaGlass];
+
+function revealGlassSequence(){
+  glassBoxes.forEach((g, idx)=>{
+    setTimeout(()=> g.classList.add('revealed'), idx * 220); // cascade
+  });
+}
+
+/* Observe when hero leaves viewport a bit - hide title and reveal glass */
+const heroObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(!entry.isIntersecting){
+      // scrolled down a bit - fade title
+      heroTitle.style.transition = 'opacity .6s ease, transform .6s ease';
+      heroTitle.style.opacity = '0';
+      heroTitle.style.transform = 'translateY(-10px)';
+    }else{
+      heroTitle.style.opacity = '1';
+      heroTitle.style.transform = 'translateY(0)';
     }
+  });
+},{ threshold: 0.6 });
+heroObserver.observe(document.getElementById('hero'));
 
-    /* ---------- VERIFY WITH SERVER (secure HMAC check) ---------- */
-    async function verifyWithServer(stall, token, exp){
-      if(!JWT || !CURRENT_USER) { showError('Not signed in'); return; }
-      if(!token || !exp){
-        showError('QR token missing or invalid');
-        return;
-      }
-      try{
-        const r = await fetch(BASE + '/api/verify', {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${JWT}` },
-          body: JSON.stringify({ stall, token, exp })
-        });
-        const j = await r.json();
-        if(r.ok && j && j.ok){
-          markStallVisited(stall);
-          showToast(`Recorded visit: ${stall}`);
-          await loadLeaderboard();
-        } else {
-          showError(j.error || 'Invalid or expired token');
-        }
-      }catch(e){
-        console.error('verifyWithServer', e);
-        showError('Could not verify QR. Try again.');
-      }
+/* When the glass zone appears in view, reveal the boxes (exactly at pond area) */
+const glassObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      revealGlassSequence();
+    } else {
+      // hide when completely out of view upward
+      // keep them hidden when off-screen above
+      // (we won't remove .revealed; keep simple)
     }
+  });
+},{ threshold: 0.22 });
+glassObserver.observe(glassZone);
 
-    /* ---------- LEADERBOARD ---------- */
-    async function loadLeaderboard(){
-      leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.9)">Loading…</div>';
-      try{
-        const r = await fetch(BASE + '/api/leaderboard');
-        if(!r.ok){ leaderListEl.innerHTML = '<div style="padding:8px 0;color:#ffdddd">Error loading leaderboard.</div>'; return; }
-        const j = await r.json();
-        // server returns { top: [...] } earlier — handle both shapes
-        const rows = Array.isArray(j) ? j : (j.top || []);
-        if(!rows.length){ leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.7)">No visits recorded yet.</div>'; return; }
-        leaderListEl.innerHTML = '';
-        rows.forEach((r,i)=>{
-          const row = document.createElement('div');
-          row.className = 'row';
-          row.style.display = 'flex';
-          row.style.justifyContent = 'space-between';
-          row.style.padding = '8px 6px';
-          row.innerHTML = `<div style="font-weight:700">${i+1}. ${r.name || r.delegateId || r.user || 'Delegate'}</div><div style="opacity:0.92">${r.count||r.cnt||0} stall${(r.count||r.cnt||0)===1?"":"s"}</div>`;
-          leaderListEl.appendChild(row);
-        });
-      }catch(e){
-        console.error('loadLeaderboard',e);
-        leaderListEl.innerHTML = '<div style="padding:8px 0;color:#ffdddd">Error loading leaderboard.</div>';
-      }
-    }
-    window.manualRefreshLeaderboard = function(){ loadLeaderboard().then(()=>showToast('Leaderboard refreshed')); };
+/* Scroll helpers */
+scrollToPassport?.addEventListener('click', ()=>document.getElementById('passport').scrollIntoView({behavior:'smooth'}));
+document.getElementById('openPrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='flex' });
+document.getElementById('closePrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='none' });
+document.getElementById('qr-close')?.addEventListener('click', closeScanner);
 
-    /* ---------- INITIAL BUILD & Session check ---------- */
-    (async function init(){
-      try{
-        await buildGridFromServer();
-        // if token exists, validate and show UI
-        await validateExistingSession();
-        // load leaderboard (public)
-        await loadLeaderboard();
-      }catch(e){ console.warn(e); }
-    })();
+/* ---------- Init ---------- */
+(function init(){
+  buildGrid(DEFAULT_STALL_COUNT);
+  updateUIForAuth();
+  // if logged in, load visits + leaderboard
+  if(jwtToken && delegateId){
+    loadUserVisitsAndLeaderboard();
+  }else{
+    loadLeaderboard();
+  }
 
-    /* ---------- PRAYER MODAL ---------- */
-    window.openPrayerModal = function(){ prayerModal.style.display = 'flex'; prayerModal.setAttribute('aria-hidden','false'); };
-    window.closePrayerModal = function(){ prayerModal.style.display = 'none'; prayerModal.setAttribute('aria-hidden','true'); };
+  // wire refresh
+  refreshLeaderboardBtn?.addEventListener('click', ()=> loadLeaderboard().then(()=>showToast('Leaderboard refreshed')));
 
-    /* ---------- SCROLL HELPERS ---------- */
-    window.scrollToContest = ()=>document.getElementById('contest').scrollIntoView({behavior:'smooth'});
-    window.scrollToLeaderboard = ()=>document.getElementById('leaderboard').scrollIntoView({behavior:'smooth', block:'start'});
+  // hook logout button (it is inside logoutWrap, created)
+  logoutBtn?.addEventListener && logoutBtn.addEventListener('click', ()=>{ /* fallback if present */ });
 
-    /* ---------- Clean-up in case of stale tokens on 401 responses (global fetch wrapper optional) ---------- */
-    // small helper: wrap fetch to handle 401 -> auto-logout
-    async function safeFetch(url, opts){
-      const res = await fetch(url, opts);
-      if(res.status === 401){
-        clearAuth();
-        showError('Session expired. Please login again.');
-      }
-      return res;
-    }
+  // make sure auth UI responds to stored token
+  if(jwtToken && delegateId){
+    gridCard.classList.remove('hidden');
+  }
+})();
 
-    // expose a convenience for debugging
-    window._debug = { BASE, getToken: ()=>JWT, getUser: ()=>CURRENT_USER };
-
-  </script>
-
+</script>
 </body>
 </html>
