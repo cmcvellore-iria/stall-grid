@@ -296,6 +296,23 @@ app.get("/api/leaderboard", (req, res) => {
 
   res.json({ top: out });
 });
+// ---------------------------------------------------------
+// GENERATE TOKEN FOR QR (ADMIN USE)
+// ---------------------------------------------------------
+app.post("/make-token", (req, res) => {
+  const { stall, exp } = req.body;
+
+  if (!stall || !exp)
+    return res.status(400).json({ ok: false, error: "missing fields" });
+
+  const payload = `ADMIN|${stall}|${exp}`;
+  const token = crypto
+    .createHmac("sha256", TOKEN_SECRET)
+    .update(payload)
+    .digest("hex");
+
+  return res.json({ ok: true, token });
+});
 
 // ---------------------------------------------------------
 // START SERVER
