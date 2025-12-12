@@ -1,91 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>QR Generator - IRIA Stalls</title>
-  <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      margin: 10px 0;
-    }
-    #qr {
-      margin-top: 20px;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .out {
-      margin-top: 20px;
-      padding: 10px;
-      background: #f3f3f3;
-      word-break: break-all;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>QR Generator – IRIA 2025 Stall Grid</title>
+
+<!-- QR library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background:#020617;
+    color:#eaf7ff;
+    margin:0;
+    padding:40px 20px;
+  }
+
+  h1 {
+    text-align:center;
+    font-size:1.8rem;
+    margin-bottom:10px;
+    color:#f1f5f9;
+  }
+  h2 {
+    text-align:center;
+    opacity:0.85;
+    margin-bottom:30px;
+    font-weight:400;
+  }
+
+  .qr-grid {
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:24px;
+  }
+
+  .qr-card {
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(12px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.25);
+    border-radius:16px;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 10px 28px rgba(0,0,0,0.35);
+  }
+
+  canvas {
+    width:200px !important;
+    height:200px !important;
+    margin-bottom:10px;
+  }
+
+  .stall-label {
+    font-size:1.1rem;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+
+  .download-btn {
+    margin-top:10px;
+    padding:8px 14px;
+    border-radius:10px;
+    background:#8bbcea;
+    border:none;
+    color:#042a3a;
+    font-weight:700;
+    cursor:pointer;
+  }
+</style>
 </head>
 
 <body>
-  <h2>IRIA Stall QR Generator</h2>
 
-  <label>Stall Number:</label>
-  <input id="stall" type="number" min="1" placeholder="Enter stall number">
+<h1>IRIA 2025 – Stall QR Generator</h1>
+<h2>Static exhibitor QR → links to <br> https://cmcvellore-iria.github.io/stall-grid/?stall=XX</h2>
 
-  <label>Expiry (minutes from now):</label>
-  <input id="mins" type="number" value="1440">
+<div class="qr-grid" id="qrGrid"></div>
 
-  <button onclick="makeQR()">Generate QR Code</button>
+<script>
+/* -----------------------------------
+   CONFIG
+------------------------------------ */
+const TOTAL_STALLS = 35;
+const BASE_URL = "https://cmcvellore-iria.github.io/stall-grid/?stall=";
 
-  <div class="out" id="result"></div>
-  <div id="qr"></div>
+/* -----------------------------------
+   BUILD QR CARDS
+------------------------------------ */
+function generateAllQRs() {
+  const grid = document.getElementById("qrGrid");
+  grid.innerHTML = "";
 
-  <!-- QR Code Library -->
-  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
+  for (let i = 1; i <= TOTAL_STALLS; i++) {
+    const url = BASE_URL + i;
 
-  <script>
-    const BACKEND = "https://cmc-iria-secure.onrender.com";
-    const FRONTEND = "https://cmcvellore-iria.github.io/stall-grid";
+    const card = document.createElement("div");
+    card.className = "qr-card";
 
-    async function makeQR() {
-      const stall = document.getElementById("stall").value;
-      const mins = document.getElementById("mins").value;
+    const label = document.createElement("div");
+    label.className = "stall-label";
+    label.textContent = `Stall ${i}`;
 
-      if (!stall) return alert("Enter stall number");
+    const canvas = document.createElement("canvas");
+    canvas.id = "qr" + i;
 
-      // 1) Request signed token from backend
-      const resp = await fetch(`${BACKEND}/make-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stall, expMins: mins })
-      });
+    const qr = new QRious({
+      element: canvas,
+      size: 200,
+      value: url,
+      level: "H"
+    });
 
-      const data = await resp.json();
-      if (!data.ok) {
-        document.getElementById("result").innerText = `Error: ${data.error}`;
-        return;
-      }
+    const btn = document.createElement("button");
+    btn.className = "download-btn";
+    btn.textContent = "Download QR";
 
-      // 2) backend returns token + exp timestamp
-      const url = `${FRONTEND}/?stall=${stall}&exp=${data.exp}&token=${data.token}`;
+    btn.onclick = () => {
+      const link = document.createElement("a");
+      link.download = `stall-${i}-qr.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    };
 
-      // 3) Show signed URL text
-      document.getElementById("result").innerHTML = `<b>Signed URL:</b><br>${url}`;
+    card.appendChild(label);
+    card.appendChild(canvas);
+    card.appendChild(btn);
 
-      // 4) Generate QR
-      document.getElementById("qr").innerHTML = "";
-      new QRCode(document.getElementById("qr"), {
-        text: url,
-        width: 256,
-        height: 256
-      });
-    }
-  </script>
+    grid.appendChild(card);
+  }
+}
+
+generateAllQRs();
+</script>
 
 </body>
 </html>
