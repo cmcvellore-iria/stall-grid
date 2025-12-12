@@ -1,384 +1,596 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CMC Stall Grid Passport – IRIA 2025</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CMC Stall Grid Contest – IRIA 2025</title>
 
+<!-- QR scanning library -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background:#020617;
-    color:#f8fafc;
-    overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
+/* RESET + BASE ---------------------------------------------------- */
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  background:#020617;
+  color:#0b2338;
+  overflow-x:hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* HERO */
-  .hero-bg{
-    position:fixed; inset:0;
-    background:url("assets/chapel-hero.jpg") center center/cover no-repeat;
-    z-index:-3;
-  }
+/* HERO BACKGROUND ------------------------------------------------- */
+.hero-bg {
+  position:fixed;
+  inset:0;
+  background:url("assets/chapel-hero.jpg") center center/cover no-repeat;
+  z-index:-3;
+}
+.hero-overlay {
+  position:fixed;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(255,255,255,0.0), rgba(255,255,255,0.0));
+  z-index:-2;
+}
 
-  /* 10% white mist — NOT dimming the image */
-  .hero-mist{
-    position:fixed; inset:0;
-    background:rgba(255,255,255,0.10);
-    z-index:-2;
-  }
+/* TOP LOGO BAR ----------------------------------------------------- */
+.top-bar {
+  position:fixed;
+  top:0; left:0; right:0;
+  height:110px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 24px;
+  z-index:50;
+}
+.logo img {
+  height:72px;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
 
-  .top-bar{
-    position:fixed; top:0; left:0; right:0;
-    height:110px; padding:15px 22px;
-    display:flex; justify-content:space-between; align-items:center;
-    z-index:50;
-    pointer-events:none;
-  }
-  .top-bar .logo{pointer-events:auto}
-  .logo img{height:70px}
+/* HERO TITLES ------------------------------------------------------ */
+.hero-title {
+  position:fixed;
+  top:78px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:40;
+  transition:opacity .5s ease, transform .5s ease;
+  pointer-events:none;
+}
+.hero-title .main {
+  font-size:1.55rem;
+  font-weight:700;
+  color:#000;
+}
+.hero-title .sub {
+  margin-top:6px;
+  font-size:1rem;
+  color:#000;
+}
 
-  /* HERO CENTER TITLE */
-  .hero-title{
-    position:fixed;
-    top:80px; left:50%; transform:translateX(-50%);
-    text-align:center;
-    z-index:40;
-    transition:opacity .5s ease, transform .5s ease;
-  }
-  .hero-title .main{
-    font-size:1.6rem; font-weight:700;
-    color:#e8f8ff;
-    text-shadow:0 2px 6px rgba(0,0,0,0.3);
-  }
-  .hero-title .sub{
-    margin-top:6px;
-    font-size:1rem;
-    opacity:0.92;
-    color:#e8f8ff;
-  }
+/* HERO SPACER ------------------------------------------------------ */
+.hero-wrap {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-  /* HERO CONTAINER */
-  .hero-wrap{
-    min-height:100vh;
-    display:flex; align-items:center; justify-content:center;
-  }
+:root { --vh:1vh; }
+.fix-h { height: calc(var(--vh) * 100); }
 
-  /* GLASS ZONE */
-  .glass-zone{
-    margin-top:60vh;
-    padding-bottom:70px;
-    display:flex; flex-direction:column; gap:20px; align-items:center;
-  }
+/* GLASS ZONE ------------------------------------------------------- */
+.glass-zone {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:24px;
+  padding-top:60vh;
+  padding-bottom:48px;
+}
+.glass {
+  width:min(1100px, 94%);
+  background:rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-radius:16px;
+  padding:26px 32px;
+  border:1px solid rgba(255,255,255,0.32);
+  box-shadow:0 12px 42px rgba(0,0,0,0.35);
+  color:#031026;
+  opacity:0;
+  transform:translateY(30px);
+  transition:opacity .9s cubic-bezier(.2,.9,.2,1),
+             transform .9s cubic-bezier(.2,.9,.2,1);
+}
+.glass.revealed {
+  opacity:1;
+  transform:translateY(0);
+}
 
-  .glass{
-    width:min(900px,92%);
-    background:rgba(255,255,255,0.20);
-    border-radius:18px;
-    padding:28px;
-    backdrop-filter:blur(13px) saturate(140%);
-    border:1px solid rgba(255,255,255,0.35);
-    opacity:0; transform:translateY(28px);
-    transition:opacity .8s ease, transform .8s ease;
-  }
-  .glass.revealed{opacity:1; transform:translateY(0)}
+/* VERSE ------------------------------------------------------------ */
+.verse {
+  font-family:"Times New Roman", serif;
+  font-size:1.15rem;
+  line-height:1.55;
+  text-align:center;
+}
+.verse-ref {
+  display:block;
+  margin-top:10px;
+  font-size:0.95rem;
+  opacity:0.88;
+}
 
-  .verse{text-align:center;font-style:italic;font-size:1.05rem;color:#021d2a}
-  .verse-ref{display:block;margin-top:8px;font-size:0.9rem;opacity:0.8}
+/* AUNT IDA --------------------------------------------------------- */
+.ida-title {
+  font-family:"Times New Roman", serif;
+  font-size:1.2rem;
+  font-weight:700;
+  text-align:center;
+  margin-bottom:10px;
+}
+.ida-preview {
+  font-family:"Times New Roman", serif;
+  font-size:1.02rem;
+  opacity:0.95;
+  text-align:center;
+  margin-bottom:14px;
+}
 
-  .ida-title{text-align:center;font-family:"Times New Roman",serif;font-size:1.1rem;margin-bottom:6px;color:#021d2a}
-  .ida-preview{text-align:center;color:#02202f;font-family:"Times New Roman",serif;font-size:1rem}
+#ida-full {
+  margin-top:12px;
+  display:none;
+  font-family:"Times New Roman", serif;
+  line-height:1.55;
+  font-size:1rem;
+  white-space:pre-line;
+}
 
-  .hero-actions{margin-top:12px;display:flex;gap:14px;justify-content:center}
-  .link-btn{
-    padding:10px 18px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,0.6);
-    background:rgba(255,255,255,0.15);
-    color:#002131;
-    font-weight:600;
-    cursor:pointer;
-    backdrop-filter:blur(6px);
-  }
-  .scroll-hint{cursor:pointer;font-size:0.95rem;opacity:0.8;color:#002131}
+.ida-toggle-btn {
+  margin-top:14px;
+  background:rgba(255,255,255,0.35);
+  border:1px solid rgba(255,255,255,0.45);
+  padding:10px 18px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
 
-  /* AUTH + GRID */
-  .passport{padding:50px 20px;margin-top:50px}
-  .content-wrap{max-width:1050px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+/* PASSPORT SECTION ------------------------------------------------- */
+.passport {
+  padding:40px 20px 80px;
+  margin-top:30px;
+}
+.content-wrap {
+  max-width:1100px;
+  margin:0 auto;
+  width:96%;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
 
-  .auth-card,.grid-card{
-    background:rgba(255,255,255,0.15);
-    backdrop-filter:blur(12px);
-    padding:20px;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,0.25);
-  }
+/* AUTH CARD -------------------------------------------------------- */
+.auth-card, .grid-card {
+  background:rgba(255,255,255,0.16);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(10px);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  color:#eaf7ff;
+}
 
-  .pill{
-    display:inline-block;
-    padding:5px 10px;
-    border-radius:999px;
-    background:rgba(9,14,21,0.45);
-    letter-spacing:0.12em;
-    font-size:12px;
-  }
+.auth-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.pill {
+  background:rgba(9,14,21,0.45);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  letter-spacing:0.12em;
+  color:#eaf7ff;
+}
 
-  input{
-    width:100%; padding:12px;
-    border-radius:12px;
-    margin-top:10px;
-    border:1px solid rgba(255,255,255,0.22);
-    background:rgba(255,255,255,0.25);
-    backdrop-filter:blur(8px);
-    color:#002131;
-    font-size:0.95rem;
-  }
+input {
+  width:100%;
+  margin-top:10px;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid rgba(200,210,220,0.15);
+  background:rgba(3,6,10,0.50);
+  color:#eef7ff;
+  font-size:1rem;
+}
 
-  .auth-buttons{display:flex;gap:12px;margin-top:14px}
-  .btn-register{
-    background:#b9f5df; color:#003826;
-    padding:10px 16px; border-radius:999px; border:none; cursor:pointer;
-  }
-  .btn-login{
-    background:#b3dffe; color:#002846;
-    padding:10px 16px; border-radius:999px; border:none; cursor:pointer;
-  }
-  .btn-ghost{
-    background:transparent;
-    border:1px solid rgba(255,255,255,0.4);
-    padding:9px 14px; border-radius:999px; cursor:pointer;
-    color:#e8f8ff;
-  }
+.auth-buttons {
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.btn-register {
+  background:#9ad3bc;
+  color:#062c21;
+  padding:10px 16px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn-login {
+  background:#8bbcea;
+  color:#06253b;
+  padding:10px 16px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn-ghost {
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.25);
+  padding:8px 14px;
+  border-radius:999px;
+  color:#eaf7ff;
+  cursor:pointer;
+}
 
-  #grid-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px}
-  .neon-stall{
-    padding:16px;
-    border-radius:14px;
-    background:rgba(255,255,255,0.18);
-    border:1px solid rgba(34,211,238,0.6);
-    color:#d8fcff; text-align:center; cursor:pointer;
-    font-weight:700;
-    backdrop-filter:blur(8px);
-    transition:transform .15s, box-shadow .15s;
-  }
-  .neon-stall:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,0.4)}
-  .neon-stall.visited{
-    background:rgba(0,60,32,0.3);
-    border-color:#4ade80;
-    color:#e9ffe9;
-  }
+/* STALL GRID ------------------------------------------------------- */
+.grid-container {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:14px;
+  margin-top:12px;
+}
+.neon-stall {
+  padding:18px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.20);
+  backdrop-filter:blur(12px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.32);
+  color:#083044;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.neon-stall:hover {
+  transform:translateY(-4px);
+  box-shadow:0 14px 32px rgba(0,0,0,0.35);
+}
+.neon-stall.visited {
+  background:rgba(50,255,140,0.25);
+  border-color:rgba(50,255,140,0.85);
+  color:#0c2b16;
+}
 
-  #toast{
-    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
-    background:#002b44;color:#e8faff;
-    padding:12px 20px;border-radius:999px;
-    opacity:0;transition:opacity .25s;
-  }
-  #toast.show{opacity:1}
+/* LEADERBOARD ------------------------------------------------------ */
+#leader-list {
+  margin-top:12px;
+  max-height:260px;
+  overflow:auto;
+  padding-right:6px;
+  color:#eaf7ff;
+}
+#leader-list .row {
+  display:flex;
+  justify-content:space-between;
+  padding:8px 4px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+/* QR OVERLAY ------------------------------------------------------- */
+#qr-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,12,0.92);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:150;
+  padding:20px;
+}
+#qr-reader {
+  width:360px;
+  max-width:96%;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+/* TOAST ------------------------------------------------------------ */
+#toast {
+  position:fixed;
+  bottom:26px;
+  left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:#021021;
+  color:#e9f9ff;
+  padding:10px 18px;
+  border-radius:999px;
+  opacity:0;
+  pointer-events:none;
+  z-index:200;
+  transition:opacity .25s ease, transform .25s ease;
+}
+#toast.show {
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* HIDDEN ----------------------------------------------------------- */
+.hidden { display:none !important; }
+
+@media(max-width:780px) {
+  .grid-container { grid-template-columns: repeat(2, 1fr); }
+  .logo img { height:58px; }
+}
+@media(max-width:460px) {
+  .grid-container { grid-template-columns: repeat(1, 1fr); }
+  .hero-title .main { font-size:1.32rem; }
+}
 </style>
 </head>
 
 <body>
 
+<!-- HERO BACKGROUND -->
 <div class="hero-bg"></div>
-<div class="hero-mist"></div>
+<div class="hero-overlay"></div>
 
-<!-- FIXED LOGOS + TITLE -->
+<!-- TOP LOGOS -->
 <div class="top-bar">
-  <div class="logo"><img src="assets/iria2025.png"></div>
-  <div class="hero-title">
-    <div class="main">Welcome to the Stall Grid Contest</div>
-    <div class="sub">Explore every stall • Scan QR • Win exciting prizes</div>
-  </div>
-  <div class="logo"><img src="assets/cmc.png"></div>
+  <div class="logo"><img src="assets/iria2025.png" alt="IRIA"></div>
+  <div class="logo"><img src="assets/cmc.png" alt="CMC"></div>
 </div>
 
-<main class="hero-wrap" id="hero"></main>
+<!-- HERO TITLES -->
+<div class="hero-title" id="heroTitle">
+  <div class="main">Welcome to the Stall Grid Contest</div>
+  <div class="sub">Explore every exhibitor, scan each stall QR, and complete your passport</div>
+</div>
 
+<!-- HERO SPACER -->
+<main class="hero-wrap fix-h"></main>
+
+<!-- GLASS INTRO SECTION -->
 <section class="glass-zone" id="glass-zone">
-  <div class="glass" id="verseGlass">
-    <div class="verse">“Even as the Son of man came not to be ministered unto, but to minister…” <span class="verse-ref">Matthew 20:28</span></div>
-  </div>
 
-  <div class="glass" id="idaGlass">
-    <div class="ida-title">Aunt Ida’s Prayer</div>
-    <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
-    <div class="hero-actions">
-      <button class="link-btn" id="openPrayerBtn">Read Full Prayer</button>
-      <div class="scroll-hint" id="scrollToPassport">Scroll to Start ↓</div>
+  <!-- VERSE CARD -->
+  <div class="glass" id="verseGlass">
+    <div class="verse">
+      “Even as the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many.”
+      <span class="verse-ref">Matthew 20:28</span>
     </div>
   </div>
-</section>
 
-<section id="passport" class="passport">
+  <!-- AUNT IDA CARD -->
+  <div class="glass" id="idaGlass">
+    <div class="ida-title">Aunt Ida’s Prayer</div>
+    <div class="ida-preview">
+      Father, whose life is within me, and whose love is ever about me…
+    </div>
+
+    <button class="ida-toggle-btn" id="idaToggle">Read full prayer ↓</button>
+
+    <div id="ida-full">
+Father, whose life is within me,
+and whose love is ever about me,
+Grant that Thy life may be maintained in my life today and every day,
+as with gladness of heart, without haste or confusion of thought,
+I go about my daily tasks,
+conscious of the ability to meet every rightful demand,
+seeing the larger meaning of little things,
+and finding beauty and love everywhere.
+In the sense of Thy presence, may I walk through the hours,
+breathing the atmosphere of love rather than anxious striving...
+    </div>
+  </div>
+
+</section>
+<!-- ============================= -->
+<!--        PASSPORT SECTION       -->
+<!-- ============================= -->
+
+<section id="passport" class="passport panel">
   <div class="content-wrap">
 
-    <!-- UPDATED AUTH CARD -->
+    <!-- AUTH CARD -->
     <div class="auth-card" id="auth-card">
-      <div class="pill">DELEGATE LOGIN</div>
-      <h3 style="margin-top:10px;color:#e8faff;font-size:1.1rem;font-weight:700">
-        Access Your Stall Grid Passport
-      </h3>
+      <div class="auth-top">
+        <div>
+          <div class="pill">Delegate Login</div>
+          <div style="font-size:1.05rem;font-weight:700;margin-top:6px">
+            Access Your Stall Grid Passport
+          </div>
+        </div>
 
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="auth-status">Not signed in</div>
+          <div id="logout-wrap" class="hidden">
+            <button class="btn-ghost" id="logoutBtn">Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registration Inputs -->
+      <input id="regid-input" placeholder="Your Official Registration ID (required)">
       <input id="name-input" placeholder="Full Name (as per registration)">
       <input id="email-input" placeholder="Email (as per registration)">
-      <input id="regid-input" placeholder="Registration ID (required)">
-      <input id="password-input" type="password" placeholder="Create / Enter Password">
+      <input id="password-input" type="password" placeholder="Create a Password">
 
+      <!-- Buttons -->
       <div class="auth-buttons">
-        <button class="btn-register" id="registerBtn">Create My Passport</button>
+        <button class="btn-register" id="registerBtn">Register</button>
         <button class="btn-login" id="loginBtn">Login</button>
         <button class="btn-ghost" id="forgotBtn">Forgot?</button>
       </div>
 
-      <p style="margin-top:12px;font-size:0.9rem;color:#e8faff">
-        Your **official Registration ID** is required so we can verify your eligibility for prizes.
+      <p style="margin-top:12px;font-size:0.93rem;color:rgba(235,245,255,0.95);line-height:1.45">
+        Please use the <b>same Name, Email, and Registration ID</b> you used for the IRIA 2025 Conference registration.
+        Only verified participants will appear in the leaderboard & be eligible for prizes.
       </p>
     </div>
-    <!-- GRID CARD -->
+
+
+    <!-- ============================= -->
+    <!--        GRID + LEADERBOARD     -->
+    <!-- ============================= -->
+
     <div class="grid-card hidden" id="grid-card">
+
       <div style="display:flex;justify-content:space-between;align-items:center">
+
         <div>
-          <div class="pill">STALL GRID</div>
-          <div style="font-size:1rem;font-weight:600;margin-top:6px;">Scan QR at Each Exhibitor</div>
+          <div class="pill">Stall Grid</div>
+          <div style="font-size:1rem;font-weight:600;margin-top:6px;">
+            Tap any stall tile to scan the QR at that exhibitor.
+          </div>
           <p style="font-size:0.9rem;opacity:0.9;margin-top:6px;">
-            Tap a stall tile to open the camera. Your visit is recorded instantly.
+            Each successful scan stamps your passport and appears on the leaderboard.
           </p>
         </div>
+
         <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
       </div>
 
-      <div id="user-banner" class="hidden"
-           style="margin-top:12px;font-weight:700;font-size:1rem;color:#e8faff"></div>
+      <!-- Logged-in user banner -->
+      <div id="user-banner" class="hidden" style="margin-top:12px;font-weight:700;"></div>
 
-      <div id="grid" class="grid-container" style="margin-top:14px"></div>
+      <!-- Stall Grid -->
+      <div id="grid" class="grid-container" aria-live="polite" style="margin-top:18px"></div>
 
-      <div id="leaderboard" style="margin-top:22px">
-        <div class="pill">LEADERBOARD</div>
-        <div style="font-size:0.95rem;font-weight:600;margin-top:6px;">
-          Most Active Stall Explorers
+      <!-- Leaderboard -->
+      <div id="leaderboard" style="margin-top:26px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="pill">Leaderboard</div>
+            <div style="font-size:1rem;font-weight:600;margin-top:6px">
+              Most Active Stall Explorers
+            </div>
+          </div>
         </div>
-        <div id="leader-list" style="margin-top:10px"></div>
+
+        <div id="leader-list"></div>
       </div>
+
     </div>
 
   </div>
 </section>
 
 
-<!-- QR OVERLAY -->
-<div id="qr-overlay"
-     style="position:fixed;inset:0;background:rgba(2,8,16,0.92);display:none;align-items:center;justify-content:center;z-index:200">
-  <div id="qr-reader" style="width:360px;max-width:92%;border-radius:14px;overflow:hidden"></div>
-  <button class="btn-ghost" id="qr-close" style="margin-top:14px">Close</button>
-</div>
-
-<!-- PRAYER MODAL -->
-<div id="prayer-modal"
-     style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,12,0.65);z-index:250;padding:14px">
-  <div style="background:white;color:#031025;padding:20px;border-radius:14px;max-width:750px;max-height:80vh;overflow:auto">
-    <h3 style="font-family:Times New Roman,serif;font-style:italic">Aunt Ida’s Prayer</h3>
-    <div style="font-family:Times New Roman,serif;font-style:italic;line-height:1.5;margin-top:10px">
-      Father, whose life is within me, and whose love is ever about me...
-      <p style="margin-top:12px">...(full prayer here)...</p>
-    </div>
-    <div style="text-align:right;margin-top:10px">
-      <button class="link-btn" id="closePrayerBtn">Close</button>
-    </div>
+<!-- ============================= -->
+<!--        QR SCANNER OVERLAY     -->
+<!-- ============================= -->
+<div id="qr-overlay">
+  <div id="qr-reader"></div>
+  <div style="margin-top:14px">
+    <button class="btn-ghost" id="qr-close">Close</button>
   </div>
 </div>
 
-<div id="toast"></div>
-
-
-<!-- =================================================================== -->
-<!-- ======================   JAVASCRIPT START   ======================== -->
-<!-- =================================================================== -->
+<!-- TOAST MESSAGE -->
+<div id="toast" role="status"></div>
 <script type="module">
-
-/* CONFIG --------------------------------------------------------------- */
+/* ---------------------------
+   CONFIG
+---------------------------- */
 const API_BASE = "https://cmc-iria-secure.onrender.com";
 const DEFAULT_STALL_COUNT = 35;
 
-/* ELEMENTS ------------------------------------------------------------- */
+/* ---------------------------
+   ELEMENT REFERENCES
+---------------------------- */
 const authCard = document.getElementById("auth-card");
 const gridCard = document.getElementById("grid-card");
+const leaderListEl = document.getElementById("leader-list");
 const gridEl = document.getElementById("grid");
-const leaderEl = document.getElementById("leader-list");
-const toastEl = document.getElementById("toast");
 const userBanner = document.getElementById("user-banner");
-const heroTitle = document.querySelector(".hero-title");
+const authStatus = document.getElementById("auth-status");
+const logoutWrap = document.getElementById("logout-wrap");
+const qrOverlay = document.getElementById("qr-overlay");
+const toastEl = document.getElementById("toast");
+const qrReader = document.getElementById("qr-reader");
 
-/* INPUTS */
+const regIdInput = document.getElementById("regid-input");
 const nameInput = document.getElementById("name-input");
 const emailInput = document.getElementById("email-input");
-const regIdInput = document.getElementById("regid-input");
 const passInput = document.getElementById("password-input");
 
 const registerBtn = document.getElementById("registerBtn");
 const loginBtn = document.getElementById("loginBtn");
-const forgotBtn = document.getElementById("forgotBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const forgotBtn = document.getElementById("forgotBtn");
 const refreshLeaderboardBtn = document.getElementById("refreshLeaderboardBtn");
+const prayerBody = document.getElementById("prayer-body");
+const openPrayerBtn = document.getElementById("openPrayerBtn");
 
-/* QR */
-const qrOverlay = document.getElementById("qr-overlay");
-const qrReaderEl = document.getElementById("qr-reader");
-
-
-/* STATE --------------------------------------------------------------- */
+/* ---------------------------
+   STATE
+---------------------------- */
 let jwtToken = localStorage.getItem("jwt") || null;
 let delegateId = localStorage.getItem("delegateId") || null;
 let currentName = localStorage.getItem("name") || null;
 
-
-/* TOAST --------------------------------------------------------------- */
-function showToast(msg){
+/* ---------------------------
+   UTILS
+---------------------------- */
+function showToast(msg) {
   toastEl.textContent = msg;
   toastEl.classList.add("show");
-  setTimeout(()=>toastEl.classList.remove("show"), 2200);
+  toastEl.style.opacity = "1";
+  setTimeout(() => {
+    toastEl.style.opacity = "0";
+    toastEl.classList.remove("show");
+  }, 2200);
 }
 
-
-/* API WRAPPER --------------------------------------------------------- */
-async function apiFetch(path, opts = {}){
+async function apiFetch(path, opts = {}) {
   const headers = opts.headers || {};
   headers["Content-Type"] = "application/json";
-  if(jwtToken) headers["Authorization"] = "Bearer " + jwtToken;
+  if (jwtToken) headers["Authorization"] = "Bearer " + jwtToken;
   opts.headers = headers;
 
   const res = await fetch(API_BASE + path, opts);
-  const text = await res.text();
-  let data;
-  try { data = text ? JSON.parse(text) : null; }
-  catch { data = text; }
+  const txt = await res.text();
+  let data = null;
 
-  if(!res.ok) throw (data || {error:"Request failed"});
+  try {
+    data = txt ? JSON.parse(txt) : null;
+  } catch {
+    data = txt;
+  }
+
+  if (!res.ok) throw data || { error: "Request failed", status: res.status };
   return data;
 }
 
-
-/* AUTH ---------------------------------------------------------------- */
-async function doRegister(){
+/* ---------------------------
+   AUTH HANDLERS
+---------------------------- */
+registerBtn.addEventListener("click", async () => {
+  const regId = regIdInput.value.trim();
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
-  const regId = regIdInput.value.trim();
   const pass = passInput.value.trim();
 
-  if(!name || !email || !regId || !pass){
-    alert("All fields — Name, Email, Reg-ID, Password — are required.");
-    return;
-  }
+  if (!regId || !name || !email || !pass)
+    return alert("All fields are required.");
 
-  try{
-    const payload = { name, email, regId, password: pass };
+  try {
     const data = await apiFetch("/api/signup", {
-      method:"POST",
-      body:JSON.stringify(payload)
+      method: "POST",
+      body: JSON.stringify({ regId, name, email, password: pass })
     });
 
     jwtToken = data.token;
@@ -389,27 +601,27 @@ async function doRegister(){
     localStorage.setItem("delegateId", delegateId);
     localStorage.setItem("name", currentName);
 
-    showToast("Registered & signed in");
-    updateUI();
-    await loadEverything();
-  }catch(e){
-    alert(e.error || e.message || "Registration error");
-  }
-}
+    showToast("Registered successfully!");
+    updateUIForAuth();
+    await loadUserVisitsAndLeaderboard();
+    gridCard.classList.remove("hidden");
 
-async function doLogin(){
+    document.getElementById("passport").scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    alert(e.error || "Registration failed");
+  }
+});
+
+loginBtn.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const pass = passInput.value.trim();
 
-  if(!email || !pass){
-    alert("Enter email & password.");
-    return;
-  }
+  if (!email || !pass) return alert("Enter email and password.");
 
-  try{
+  try {
     const data = await apiFetch("/api/login", {
-      method:"POST",
-      body:JSON.stringify({ email, password:pass })
+      method: "POST",
+      body: JSON.stringify({ email, password: pass })
     });
 
     jwtToken = data.token;
@@ -421,230 +633,290 @@ async function doLogin(){
     localStorage.setItem("name", currentName);
 
     showToast("Logged in");
-    updateUI();
-    await loadEverything();
-  }catch(e){
-    alert(e.error || e.message || "Login error");
-  }
-}
+    updateUIForAuth();
+    await loadUserVisitsAndLeaderboard();
 
-function doLogout(){
+    gridCard.classList.remove("hidden");
+    document.getElementById("passport").scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    alert(e.error || "Login failed");
+  }
+});
+
+logoutBtn.addEventListener("click", () => {
   jwtToken = null;
   delegateId = null;
   currentName = null;
-  localStorage.clear();
-  updateUI();
+
+  localStorage.removeItem("jwt");
+  localStorage.removeItem("delegateId");
+  localStorage.removeItem("name");
+
+  updateUIForAuth();
+  clearVisitedStalls();
+  leaderListEl.innerHTML = "";
+  gridCard.classList.add("hidden");
+
   showToast("Logged out");
-}
+});
 
+forgotBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  if (!email) return alert("Enter your email");
 
-/* UI STATE ------------------------------------------------------------ */
-function updateUI(){
-  if(jwtToken && delegateId){
+  try {
+    await apiFetch("/api/request-reset", {
+      method: "POST",
+      body: JSON.stringify({ email })
+    });
+
+    alert("If the email exists, a reset OTP was generated.");
+  } catch {
+    alert("Reset feature not enabled on this backend.");
+  }
+});
+
+/* ---------------------------
+   UI STATE UPDATER
+---------------------------- */
+function updateUIForAuth() {
+  if (jwtToken && delegateId) {
+    authStatus.textContent = `Signed in as ${currentName}`;
+    logoutWrap.classList.remove("hidden");
     authCard.classList.add("hidden");
-    gridCard.classList.remove("hidden");
+    userBanner.textContent = `Welcome, ${currentName} (ID: ${delegateId})`;
     userBanner.classList.remove("hidden");
-    userBanner.textContent =
-      `Welcome, ${currentName} (Reg-ID: ${delegateId})`;
   } else {
+    authStatus.textContent = "Not signed in";
+    logoutWrap.classList.add("hidden");
     authCard.classList.remove("hidden");
-    gridCard.classList.add("hidden");
     userBanner.classList.add("hidden");
   }
 }
 
+/* ---------------------------
+   GRID GENERATION
+---------------------------- */
+function createStallCard(num) {
+  const div = document.createElement("div");
+  div.className = "stall-tile";
+  div.dataset.stall = num;
+  div.innerHTML = `
+    <div class="stall-num">${num}</div>
+    <div class="stall-sub">Tap to scan</div>
+  `;
+  div.addEventListener("click", () => openScanner(num));
+  gridEl.appendChild(div);
+}
 
-/* STALL GRID ---------------------------------------------------------- */
-function buildGrid(n = DEFAULT_STALL_COUNT){
+function buildGrid() {
   gridEl.innerHTML = "";
-  for(let i=1;i<=n;i++){
-    const stall = document.createElement("div");
-    stall.className = "neon-stall";
-    stall.dataset.id = i;
-    stall.innerHTML = `Stall ${i}`;
-    stall.onclick = ()=>openScanner(i);
-    gridEl.appendChild(stall);
+  for (let i = 1; i <= DEFAULT_STALL_COUNT; i++) createStallCard(i);
+}
+
+/* ---------------------------
+   LOAD VISITS + LEADERBOARD
+---------------------------- */
+async function loadUserVisitsAndLeaderboard() {
+  if (jwtToken && delegateId) {
+    try {
+      const v = await apiFetch(`/api/visits/${delegateId}`, { method: "GET" });
+
+      const visited = new Set(v.visits.map(x => String(x)));
+
+      document.querySelectorAll(".stall-tile").forEach(tile => {
+        const id = tile.dataset.stall;
+        if (visited.has(id)) {
+          tile.classList.add("visited");
+          tile.innerHTML = `
+            <div class="stall-num">${id} ✓</div>
+            <div class="stall-sub">Visited</div>
+          `;
+        }
+      });
+    } catch {}
+  }
+
+  await loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  leaderListEl.innerHTML = `<div style="padding:8px 0;opacity:0.8">Loading…</div>`;
+
+  try {
+    const data = await apiFetch("/api/leaderboard", { method: "GET" });
+
+    leaderListEl.innerHTML = "";
+    data.top.forEach((r, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div style="font-weight:700">${i + 1}. ${r.name}</div>
+        <div style="opacity:0.9">${r.count} stalls</div>
+      `;
+      leaderListEl.appendChild(row);
+    });
+  } catch {
+    leaderListEl.innerHTML = `<div style="padding:8px 0;color:#faa">Error loading leaderboard</div>`;
   }
 }
 
-function markVisited(id){
-  document.querySelectorAll(".neon-stall").forEach(el=>{
-    if(Number(el.dataset.id) === Number(id)){
-      el.classList.add("visited");
-      el.textContent = `Stall ${id} ✓`;
+/* ---------------------------
+   QR SCANNING
+---------------------------- */
+let html5Qr = null;
+
+async function openScanner(stall) {
+  if (!jwtToken) return alert("Please log in first");
+
+  qrOverlay.style.display = "flex";
+  if (!html5Qr) html5Qr = new Html5Qrcode("qr-reader");
+
+  try {
+    await html5Qr.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 240 },
+      async decoded => {
+        await html5Qr.stop();
+        qrOverlay.style.display = "none";
+        await processDecodedQR(decoded, stall);
+      }
+    );
+  } catch (e) {
+    alert("Camera unavailable");
+    qrOverlay.style.display = "none";
+  }
+}
+
+document.getElementById("qr-close").addEventListener("click", async () => {
+  qrOverlay.style.display = "none";
+  if (html5Qr) try { await html5Qr.stop(); } catch {}
+});
+
+async function processDecodedQR(decoded, fallbackStall) {
+  let params = {};
+  try {
+    const u = new URL(decoded);
+    params = Object.fromEntries(u.searchParams.entries());
+  } catch {
+    decoded.split("&").forEach(p => {
+      const [k, v] = p.split("=");
+      params[k] = decodeURIComponent(v || "");
+    });
+  }
+
+  const stall = params.stall || fallbackStall;
+
+  // Hybrid mode: exhibitor QR has only ?stall
+  if (!params.token) {
+    return handleHybridFlow(stall);
+  }
+
+  // Full verification mode
+  return verifyVisit(stall, params.exp, params.token);
+}
+
+async function handleHybridFlow(stall) {
+  try {
+    const t = await apiFetch("/api/generate-visit-token", {
+      method: "POST",
+      body: JSON.stringify({ stall })
+    });
+
+    const res = await verifyVisit(stall, t.exp, t.token);
+    return res;
+  } catch (e) {
+    alert("Failed to register visit");
+  }
+}
+
+async function verifyVisit(stall, exp, token) {
+  try {
+    const res = await apiFetch("/api/verify", {
+      method: "POST",
+      body: JSON.stringify({ stall, exp, token })
+    });
+
+    if (res.ok) {
+      showToast(`Stall ${stall} stamped`);
+      markStallVisited(stall);
+      await loadUserVisitsAndLeaderboard();
+      return;
+    }
+
+    alert(res.error || "Verification failed");
+  } catch {
+    alert("Network error");
+  }
+}
+
+/* ---------------------------
+   HELPERS
+---------------------------- */
+function markStallVisited(stall) {
+  document.querySelectorAll(".stall-tile").forEach(tile => {
+    if (tile.dataset.stall == stall) {
+      tile.classList.add("visited");
+      tile.innerHTML = `
+        <div class="stall-num">${stall} ✓</div>
+        <div class="stall-sub">Visited</div>
+      `;
     }
   });
 }
 
-
-/* LOAD VISITS + LEADERBOARD ------------------------------------------ */
-async function loadVisits(){
-  if(!delegateId) return;
-  try{
-    const data = await apiFetch(`/api/visits/${delegateId}`);
-    const visited = new Set(data.visits || []);
-    visited.forEach(id => markVisited(id));
-  }catch(e){
-    console.warn(e);
-  }
+function clearVisitedStalls() {
+  document.querySelectorAll(".stall-tile").forEach(tile => {
+    tile.classList.remove("visited");
+    const id = tile.dataset.stall;
+    tile.innerHTML = `
+      <div class="stall-num">${id}</div>
+      <div class="stall-sub">Tap to scan</div>
+    `;
+  });
 }
 
-async function loadLeaderboard(){
-  leaderEl.innerHTML = "Loading…";
-  try{
-    const data = await apiFetch("/api/leaderboard");
-    leaderEl.innerHTML = "";
-    (data.top || []).forEach((p,i)=>{
-      const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.justifyContent = "space-between";
-      row.style.padding = "6px 4px";
-      row.innerHTML =
-        `<div>${i+1}. ${p.name}</div><div>${p.count} stalls</div>`;
-      leaderEl.appendChild(row);
-    });
-  }catch(e){
-    leaderEl.textContent = "Error loading leaderboard";
-  }
-}
+/* ---------------------------
+   AUTO-QR FROM URL
+---------------------------- */
+async function checkQRVisitOnLoad() {
+  const u = new URL(window.location.href);
+  const stall = u.searchParams.get("stall");
+  const exp = u.searchParams.get("exp");
+  const token = u.searchParams.get("token");
 
-async function loadEverything(){
-  await loadVisits();
-  await loadLeaderboard();
-}
+  if (!stall) return;
 
-
-/* QR SCANNING --------------------------------------------------------- */
-let qrScanner = null;
-
-async function openScanner(stall){
-  if(!jwtToken){ alert("Please login first."); return; }
-
-  qrOverlay.style.display = "flex";
-
-  if(!qrScanner){
-    qrScanner = new Html5Qrcode("qr-reader");
-  } else {
-    try { await qrScanner.stop(); } catch {}
+  if (!jwtToken) {
+    alert("Please log in to record your visit.");
+    return;
   }
 
-  await qrScanner.start(
-    { facingMode:"environment" },
-    { fps:10, qrbox:250 },
-    async (decoded)=>{
-      try{ await qrScanner.stop(); }catch{}
-      qrOverlay.style.display = "none";
-      handleQR(decoded, stall);
-    }
+  // Full signed URL
+  if (token && exp) {
+    return verifyVisit(stall, exp, token);
+  }
+
+  // Hybrid static stall QR
+  return handleHybridFlow(stall);
+}
+
+/* ---------------------------
+   PAGE LOAD
+---------------------------- */
+(function init() {
+  buildGrid();
+  updateUIForAuth();
+
+  if (jwtToken) loadUserVisitsAndLeaderboard();
+  else loadLeaderboard();
+
+  refreshLeaderboardBtn.addEventListener("click", () =>
+    loadLeaderboard().then(() => showToast("Leaderboard refreshed"))
   );
-}
 
-async function handleQR(decoded, stallClicked){
-  let urlParams = {};
-  try { urlParams = Object.fromEntries(new URL(decoded).searchParams.entries()); }
-  catch {}
-
-  const stall = urlParams.stall || stallClicked;
-
-  // Hybrid flow (static QR)
-  try{
-    const tokenResp = await apiFetch("/api/generate-visit-token", {
-      method:"POST",
-      body:JSON.stringify({ stall })
-    });
-
-    const verify = await apiFetch("/api/verify", {
-      method:"POST",
-      body:JSON.stringify({
-        stall,
-        token: tokenResp.token,
-        exp: tokenResp.exp
-      })
-    });
-
-    if(verify.ok){
-      showToast(`Recorded visit: Stall ${stall}`);
-      markVisited(stall);
-      await loadLeaderboard();
-    } else {
-      alert(verify.error || "Verification failed");
-    }
-  }catch(e){
-    alert(e.error || "QR verification error");
-  }
-}
-
-document.getElementById("qr-close").onclick = async ()=>{
-  qrOverlay.style.display = "none";
-  if(qrScanner){
-    try{ await qrScanner.stop(); }catch{}
-  }
-};
-
-
-/* HERO TITLE FADE ON SCROLL ------------------------------------------- */
-window.addEventListener("scroll", ()=>{
-  const fadeStart = 50;
-  const fadeEnd = 260;
-
-  const y = window.scrollY;
-  if(y < fadeStart){
-    heroTitle.style.opacity = "1";
-    heroTitle.style.transform = "translateX(-50%) translateY(0)";
-  } else if(y > fadeEnd){
-    heroTitle.style.opacity = "0";
-    heroTitle.style.transform = "translateX(-50%) translateY(-20px)";
-  } else {
-    const t = 1 - (y - fadeStart) / (fadeEnd - fadeStart);
-    heroTitle.style.opacity = t;
-    heroTitle.style.transform = `translateX(-50%) translateY(${-(20*(1-t))}px)`;
-  }
-});
-
-
-/* GLASS FADE-IN -------------------------------------------------------- */
-const verseGlass = document.getElementById("verseGlass");
-const idaGlass = document.getElementById("idaGlass");
-
-function revealGlass(){
-  verseGlass.classList.add("revealed");
-  setTimeout(()=> idaGlass.classList.add("revealed"), 200);
-}
-
-const glassZone = document.getElementById("glass-zone");
-new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{ if(e.isIntersecting) revealGlass(); });
-},{threshold:0.3}).observe(glassZone);
-
-
-/* MISC UI --------------------------------------------------------------- */
-document.getElementById("scrollToPassport").onclick =
-  ()=> document.getElementById("passport").scrollIntoView({behavior:"smooth"});
-
-document.getElementById("openPrayerBtn").onclick =
-  ()=> document.getElementById("prayer-modal").style.display="flex";
-
-document.getElementById("closePrayerBtn").onclick =
-  ()=> document.getElementById("prayer-modal").style.display="none";
-
-
-/* AUTH BUTTON HOOKS ---------------------------------------------------- */
-registerBtn.onclick = doRegister;
-loginBtn.onclick = doLogin;
-forgotBtn.onclick = ()=> alert("Ask registration desk to reset password.");
-if(logoutBtn) logoutBtn.onclick = doLogout;
-
-refreshLeaderboardBtn.onclick =
-  ()=> loadLeaderboard().then(()=>showToast("Leaderboard refreshed"));
-
-
-/* INIT ----------------------------------------------------------------- */
-buildGrid(DEFAULT_STALL_COUNT);
-updateUI();
-if(jwtToken && delegateId) loadEverything();
-else loadLeaderboard();
-
+  checkQRVisitOnLoad();
+})();
 </script>
-
 </body>
 </html>
