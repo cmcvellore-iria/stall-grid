@@ -288,7 +288,7 @@ window.addEventListener('orientationchange', setRealVH);
 
 /* ---------- CONFIG ---------- */
 const API_BASE = 'https://cmc-iria-secure.onrender.com'; // your Render backend
-const DEFAULT_STALL_COUNT = 15; // change if you have a different number
+const DEFAULT_STALL_COUNT = 15; // change later if needed
 
 /* ---------- ELEMENTS ---------- */
 const verseGlass = document.getElementById('verseGlass');
@@ -419,11 +419,9 @@ forgotBtn?.addEventListener('click', async ()=>{
   const email = emailInput.value.trim();
   if(!email){ alert('Enter the email used to register'); return; }
   try{
-    // many backends implement request-reset; this will attempt it but gracefully report errors
     const resp = await apiFetch('/api/request-reset', { method:'POST', body: JSON.stringify({ email }) });
     alert('If your email exists, a reset token was generated. Follow instructions.');
   }catch(e){
-    // backend may not have this endpoint - show instructive message
     console.warn('reset not supported', e);
     alert('Reset token endpoint not available on backend. You can ask admin to reset password on the server.');
   }
@@ -469,13 +467,10 @@ async function loadUserVisitsAndLeaderboard(){
     if(jwtToken && delegateId){
       // load visits
       const v = await apiFetch(`/api/visits/${delegateId}`, { method:'GET' });
-      // v expected { visits: [stallNumbers] } (depends on your backend)
       if(v && v.visits){
-        // mark visited stalls
         const set = new Set(v.visits.map(x=>String(x)));
         document.querySelectorAll('.neon-stall').forEach(card=>{
           const sid = card.dataset.stallId;
-          // server uses numeric stall (like 1) — if your visits are numbers, ensure we match; support both
           const numeric = sid.replace(/[^0-9]/g,'');
           if(set.has(sid) || set.has(numeric)){
             card.classList.add('visited');
@@ -510,6 +505,80 @@ async function loadLeaderboard(){
   }
 }
 
+/* ---------- AUTO-DETECT STATIC QR & DO SECURE FLOW ---------- */
+async function checkQRVisit() {
+  const params = new URLSearchParams(window.location.search);
+  const stallParam = params.get("stall");
+  const expParam = params.get("exp");
+  const tokenParam = params.get("token");
+
+  // If no stall in URL -> nothing to do
+  if (!stallParam) return;
+
+  // If the QR already includes token & exp (unlikely in hybrid), we can directly verify
+  if (tokenParam && expParam) {
+    // existing verify path (requires auth)
+    if (!jwtToken) {
+      alert("Please log in first before verifying a QR.");
+      return;
+    }
+    try {
+      const res = await apiFetch("/api/verify", {
+        method: "POST",
+        body: JSON.stringify({ stall: Number(stallParam) || stallParam, exp: expParam, token: tokenParam })
+      });
+      if (res && res.ok) {
+        showToast(`Stall ${stallParam} stamped successfully!`);
+        await loadUserVisitsAndLeaderboard();
+      } else {
+        alert("Verification failed: " + (res && res.error ? res.error : "unknown"));
+      }
+    } catch (e) {
+      alert("Network error verifying stamp.");
+    }
+    return;
+  }
+
+  // HYBRID FLOW: static exhibitor QR contains only ?stall=#
+  // Must be logged in to request a per-delegate token
+  if (!jwtToken) {
+    alert("Please log in first to record your visit for this stall.");
+    return;
+  }
+
+  try {
+    // 1) Request per-delegate visit token (short-lived) from backend
+    const t = await apiFetch("/api/generate-visit-token", {
+      method: "POST",
+      body: JSON.stringify({ stall: Number(stallParam) || stallParam })
+    });
+    if (!t || !t.ok) {
+      alert("Could not get visit token: " + (t && t.error ? t.error : "unknown"));
+      return;
+    }
+
+    // 2) immediately verify using returned token + exp
+    const verify = await apiFetch("/api/verify", {
+      method: "POST",
+      body: JSON.stringify({ stall: Number(stallParam) || stallParam, exp: t.exp, token: t.token })
+    });
+
+    if (verify && verify.ok) {
+      showToast(`Stall ${stallParam} stamped successfully!`);
+      markStallVisited("Stall " + stallParam);
+      await loadUserVisitsAndLeaderboard();
+    } else {
+      alert("Verification failed: " + (verify && verify.error ? verify.error : "unknown"));
+    }
+  } catch (e) {
+    console.error("Hybrid QR flow failed", e);
+    alert("Error during QR verification: " + (e && e.error ? e.error : (e.message || String(e))));
+  }
+}
+
+// Run this automatically when page loads
+window.addEventListener("DOMContentLoaded", checkQRVisit);
+
 /* ---------- QR SCAN ---------- */
 let html5QrInstance = null;
 let currentStallName = null;
@@ -521,13 +590,11 @@ async function openScanner(stallName){
   const regionId = 'qr-reader';
   try{
     if(!html5QrInstance) html5QrInstance = new Html5Qrcode(regionId);
-    // ensure previous stopped
     try{ await html5QrInstance.stop(); }catch(_){}
     await html5QrInstance.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       async (decodedText) => {
-        // decodedText expected format: "stall=5&delegate=D12345&exp=...&token=abcdef..."
         try{ await html5QrInstance.stop(); }catch(_){}
         qrOverlay.style.display = 'none';
         await handleDecodedQR(decodedText);
@@ -568,25 +635,42 @@ async function handleDecodedQR(decoded){
   const stall = parts.stall || currentStallName || parts.stallId;
   const token = parts.token || parts.sig || parts.signature;
   const exp = parts.exp || parts.expiry;
-  if(!stall || !token || !exp){
+  if(!stall){
     alert('Invalid QR payload. Make sure this QR was generated by the event system.');
     return;
   }
 
-  // POST to /api/verify with Authorization Bearer <jwt>
+  // If QR only contains stall (static exhibitor QR), go hybrid flow:
+  if(!token || !exp){
+    // same logic as checkQRVisit when logged-in
+    if(!jwtToken){ alert('Please login first to record visits.'); return; }
+    try{
+      const t = await apiFetch('/api/generate-visit-token', { method:'POST', body: JSON.stringify({ stall: Number(stall) || stall }) });
+      if(!t || !t.ok){ alert('Could not get token'); return; }
+      const res = await apiFetch('/api/verify', { method:'POST', body: JSON.stringify({ stall: Number(stall) || stall, exp: t.exp, token: t.token }) });
+      if(res && res.ok){
+        markStallVisited('Stall ' + stall);
+        showToast(`Recorded visit: ${stall}`);
+        await loadUserVisitsAndLeaderboard();
+      }else{
+        alert((res && res.error) ? res.error : 'Verification failed');
+      }
+    }catch(e){
+      console.error('verify failed', e);
+      alert(e && e.error ? e.error : (e.message||String(e)));
+    }
+    return;
+  }
+
+  // If QR already contains token+exp (edge cases), use existing verify flow:
   try{
     const body = { stall: Number(stall) || stall, token, exp };
     const res = await apiFetch('/api/verify', { method:'POST', body: JSON.stringify(body) });
-    // server returns {ok:true} on success (per your server)
     if(res && res.ok){
-      // mark local UI
       markStallVisited(stall);
       showToast(`Recorded visit: ${stall}`);
       await loadUserVisitsAndLeaderboard();
     }else{
-      // if response contains error message
-      showToast('Verification failed');
-      console.warn('verify response', res);
       alert((res && res.error) ? res.error : 'Verification failed');
     }
   }catch(e){
@@ -612,21 +696,18 @@ function markStallVisited(stallName){
 }
 
 /* ---------- INTERSECTION / ANIMATION BEHAVIOR ---------- */
-/* Make hero title fade away after small scroll; reveal glass boxes in sequence */
 const glassZone = document.getElementById('glass-zone');
 const glassBoxes = [verseGlass, idaGlass];
 
 function revealGlassSequence(){
   glassBoxes.forEach((g, idx)=>{
-    setTimeout(()=> g.classList.add('revealed'), idx * 220); // cascade
+    setTimeout(()=> g.classList.add('revealed'), idx * 220);
   });
 }
 
-/* Observe when hero leaves viewport a bit - hide title and reveal glass */
 const heroObserver = new IntersectionObserver((entries)=>{
   entries.forEach(entry=>{
     if(!entry.isIntersecting){
-      // scrolled down a bit - fade title
       heroTitle.style.transition = 'opacity .6s ease, transform .6s ease';
       heroTitle.style.opacity = '0';
       heroTitle.style.transform = 'translateY(-10px)';
@@ -638,15 +719,10 @@ const heroObserver = new IntersectionObserver((entries)=>{
 },{ threshold: 0.6 });
 heroObserver.observe(document.getElementById('hero'));
 
-/* When the glass zone appears in view, reveal the boxes (exactly at pond area) */
 const glassObserver = new IntersectionObserver((entries)=>{
   entries.forEach(entry=>{
     if(entry.isIntersecting){
       revealGlassSequence();
-    } else {
-      // hide when completely out of view upward
-      // keep them hidden when off-screen above
-      // (we won't remove .revealed; keep simple)
     }
   });
 },{ threshold: 0.22 });
@@ -657,41 +733,6 @@ scrollToPassport?.addEventListener('click', ()=>document.getElementById('passpor
 document.getElementById('openPrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='flex' });
 document.getElementById('closePrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='none' });
 document.getElementById('qr-close')?.addEventListener('click', closeScanner);
-/* ---------- AUTO-DETECT QR PARAMETERS & VERIFY STALL VISIT ---------- */
-async function checkQRVisit() {
-  const params = new URLSearchParams(window.location.search);
-  const stall = params.get("stall");
-  const exp = params.get("exp");
-  const token = params.get("token");
-
-  // If QR params are not present, do nothing
-  if (!stall || !exp || !token) return;
-
-  // User must be logged in
-  if (!jwtToken) {
-    alert("Please log in before scanning stall QR codes.");
-    return;
-  }
-
-  try {
-    const res = await apiFetch("/api/verify", {
-      method: "POST",
-      body: JSON.stringify({ stall, exp, token })
-    });
-
-    if (res.ok) {
-      showToast(`Stall ${stall} stamped successfully!`);
-      await loadUserVisitsAndLeaderboard();
-    } else {
-      alert("Stamp failed: " + (res.error || "Unknown error"));
-    }
-  } catch (e) {
-    alert("Network error verifying stamp.");
-  }
-}
-
-// Run automatically when page loads
-window.addEventListener("DOMContentLoaded", checkQRVisit);
 
 /* ---------- Init ---------- */
 (function init(){
@@ -707,15 +748,15 @@ window.addEventListener("DOMContentLoaded", checkQRVisit);
   // wire refresh
   refreshLeaderboardBtn?.addEventListener('click', ()=> loadLeaderboard().then(()=>showToast('Leaderboard refreshed')));
 
-  // hook logout button (it is inside logoutWrap, created)
+  // hook logout fallback
   logoutBtn?.addEventListener && logoutBtn.addEventListener('click', ()=>{ /* fallback if present */ });
 
-  // make sure auth UI responds to stored token
   if(jwtToken && delegateId){
     gridCard.classList.remove('hidden');
   }
 })();
 
 </script>
+
 </body>
 </html>
