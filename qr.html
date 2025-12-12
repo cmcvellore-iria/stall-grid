@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QR Generator - IRIA Stalls</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 500px; margin: auto; }
+    input, button { padding: 10px; font-size: 16px; width: 100%; margin: 10px 0; }
+    .out { margin-top: 20px; padding: 10px; background: #f3f3f3; word-break: break-all; }
+  </style>
+</head>
+
+<body>
+  <h2>Stall QR Generator</h2>
+
+  <label>Stall Number:</label>
+  <input id="stall" type="number" min="1" placeholder="Enter stall number">
+
+  <label>Expiry (minutes from now):</label>
+  <input id="mins" type="number" value="1440">
+
+  <button onclick="makeQR()">Generate Signed URL</button>
+
+  <div class="out" id="result"></div>
+
+  <script>
+    async function makeQR() {
+      const stall = document.getElementById("stall").value;
+      const mins = document.getElementById("mins").value;
+
+      if (!stall) return alert("Enter stall number");
+
+      const exp = Date.now() + mins * 60 * 1000;
+
+      // Call backend to generate token
+      const token = await fetch("http://localhost:3000/make-token", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stall, exp })
+      }).then(r => r.json());
+
+      if (!token.ok) {
+        document.getElementById("result").innerText = "Error generating token";
+        return;
+      }
+
+      const finalURL = 
+        `https://YOUR_FRONTEND_SITE/?stall=${stall}&exp=${exp}&token=${token.token}`;
+
+      document.getElementById("result").innerHTML = `
+        <strong>Signed URL:</strong><br>${finalURL}
+      `;
+    }
+  </script>
+</body>
+</html>
