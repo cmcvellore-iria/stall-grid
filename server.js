@@ -1,10 +1,10 @@
 // ---------------------------------------------------------
-// CMC IRIA – STALL GRID PASSPORT BACKEND (FINAL RENDER VERSION)
+// CMC IRIA – STALL GRID PASSPORT BACKEND (HYBRID SECURE)
 // ---------------------------------------------------------
 // Features:
 //  ✓ Secure signup/login (JWT)
 //  ✓ Forget password + OTP reset
-//  ✓ Secure QR token validation (HMAC-SHA256)
+//  ✓ Secure per-delegate QR token generation (HMAC-SHA256)
 //  ✓ SQLite database storage
 //  ✓ Leaderboard
 //  ✓ Visit recording (1 per stall)
@@ -213,6 +213,32 @@ app.post("/api/reset-password", (req, res) => {
 });
 
 // ---------------------------------------------------------
+// GENERATE PER-DELEGATE VISIT TOKEN (secure hybrid model)
+// Requires auth (delegate must be logged in)
+// ---------------------------------------------------------
+app.post("/api/generate-visit-token", authMiddleware, (req, res) => {
+  const { stall } = req.body;
+
+  if (!stall)
+    return res.status(400).json({ ok: false, error: "stall required" });
+
+  // short lived token for scanning flow (5 minutes)
+  const exp = Date.now() + 5 * 60 * 1000;
+
+  const token = crypto
+    .createHmac("sha256", TOKEN_SECRET)
+    .update(`${req.user.delegateId}|${stall}|${exp}`)
+    .digest("hex");
+
+  res.json({
+    ok: true,
+    stall,
+    exp,
+    token
+  });
+});
+
+// ---------------------------------------------------------
 // VERIFY QR TOKEN (secure)
 // ---------------------------------------------------------
 app.post("/api/verify", authMiddleware, (req, res) => {
@@ -295,23 +321,6 @@ app.get("/api/leaderboard", (req, res) => {
   });
 
   res.json({ top: out });
-});
-// ---------------------------------------------------------
-// GENERATE TOKEN FOR QR (ADMIN USE)
-// ---------------------------------------------------------
-app.post("/make-token", (req, res) => {
-  const { stall, exp } = req.body;
-
-  if (!stall || !exp)
-    return res.status(400).json({ ok: false, error: "missing fields" });
-
-  const payload = `ADMIN|${stall}|${exp}`;
-  const token = crypto
-    .createHmac("sha256", TOKEN_SECRET)
-    .update(payload)
-    .digest("hex");
-
-  return res.json({ ok: true, token });
 });
 
 // ---------------------------------------------------------
