@@ -657,6 +657,41 @@ scrollToPassport?.addEventListener('click', ()=>document.getElementById('passpor
 document.getElementById('openPrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='flex' });
 document.getElementById('closePrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='none' });
 document.getElementById('qr-close')?.addEventListener('click', closeScanner);
+/* ---------- AUTO-DETECT QR PARAMETERS & VERIFY STALL VISIT ---------- */
+async function checkQRVisit() {
+  const params = new URLSearchParams(window.location.search);
+  const stall = params.get("stall");
+  const exp = params.get("exp");
+  const token = params.get("token");
+
+  // If QR params are not present, do nothing
+  if (!stall || !exp || !token) return;
+
+  // User must be logged in
+  if (!jwtToken) {
+    alert("Please log in before scanning stall QR codes.");
+    return;
+  }
+
+  try {
+    const res = await apiFetch("/api/verify", {
+      method: "POST",
+      body: JSON.stringify({ stall, exp, token })
+    });
+
+    if (res.ok) {
+      showToast(`Stall ${stall} stamped successfully!`);
+      await loadUserVisitsAndLeaderboard();
+    } else {
+      alert("Stamp failed: " + (res.error || "Unknown error"));
+    }
+  } catch (e) {
+    alert("Network error verifying stamp.");
+  }
+}
+
+// Run automatically when page loads
+window.addEventListener("DOMContentLoaded", checkQRVisit);
 
 /* ---------- Init ---------- */
 (function init(){
