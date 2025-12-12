@@ -29,8 +29,6 @@
       word-break: break-all;
     }
   </style>
-
-  <!-- QR Code Library -->
 </head>
 
 <body>
@@ -46,46 +44,48 @@
 
   <div class="out" id="result"></div>
   <div id="qr"></div>
-    <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-<script>
-  const BACKEND = "https://cmc-iria-secure.onrender.com";
-  const FRONTEND = "https://cmcvellore-iria.github.io/stall-grid";
+  <!-- QR Code Library -->
+  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-  async function makeQR() {
-    const stall = document.getElementById("stall").value;
-    const mins = document.getElementById("mins").value;
+  <script>
+    const BACKEND = "https://cmc-iria-secure.onrender.com";
+    const FRONTEND = "https://cmcvellore-iria.github.io/stall-grid";
 
-    if (!stall) return alert("Enter stall number");
+    async function makeQR() {
+      const stall = document.getElementById("stall").value;
+      const mins = document.getElementById("mins").value;
 
-    // 1) Request signed token from backend
-    const resp = await fetch(`${BACKEND}/make-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stall, expMins: mins })
-    });
+      if (!stall) return alert("Enter stall number");
 
-    const data = await resp.json();
-    if (!data.ok) {
-      document.getElementById("result").innerText = `Error: ${data.error}`;
-      return;
+      // 1) Request signed token from backend
+      const resp = await fetch(`${BACKEND}/make-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stall, expMins: mins })
+      });
+
+      const data = await resp.json();
+      if (!data.ok) {
+        document.getElementById("result").innerText = `Error: ${data.error}`;
+        return;
+      }
+
+      // 2) backend returns token + exp timestamp
+      const url = `${FRONTEND}/?stall=${stall}&exp=${data.exp}&token=${data.token}`;
+
+      // 3) Show signed URL text
+      document.getElementById("result").innerHTML = `<b>Signed URL:</b><br>${url}`;
+
+      // 4) Generate QR
+      document.getElementById("qr").innerHTML = "";
+      new QRCode(document.getElementById("qr"), {
+        text: url,
+        width: 256,
+        height: 256
+      });
     }
-
-    // 2) backend returns token + exp timestamp
-    const url = `${FRONTEND}/?stall=${stall}&exp=${data.exp}&token=${data.token}`;
-
-    // 3) Show signed URL text
-    document.getElementById("result").innerHTML = `<b>Signed URL:</b><br>${url}`;
-
-    // 4) Generate QR
-    document.getElementById("qr").innerHTML = "";
-    new QRCode(document.getElementById("qr"), {
-      text: url,
-      width: 256,
-      height: 256
-    });
-  }
-</script>
+  </script>
 
 </body>
 </html>
