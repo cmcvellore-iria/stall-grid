@@ -5,757 +5,925 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>CMC Stall Grid Passport – IRIA 2025</title>
 
-<!-- html5-qrcode -->
+<!-- QR Scanner Library -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <style>
-  /* reset & base */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background:#020617;
-    color:#f8fafc;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-x:hidden;
-  }
+/* ---------------- RESET ---------------- */
+* { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; }
 
-  /* hero background - chapel, slightly brighter */
-  .hero-wrap{
-    position:relative;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-  }
-  .hero-bg{
-    position:fixed;
-    inset:0;
-    background: url("assets/chapel-hero.jpg") center center / cover no-repeat;
-    filter: brightness(1.10); /* +10% brighter */
-    z-index:-3;
-    background-attachment: fixed;
-  }
-  /* subtle dark overlay to keep text readable but let chapel show */
-  .hero-overlay{
-    position:fixed; inset:0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.02) 10%, rgba(0,0,0,0.18) 92%);
-    z-index:-2;
-  }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  background:#020617;
+  color:#f8fafc;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
 
-  /* top fixed logos and title */
-  .top-bar{
-    position:fixed; left:0; right:0; top:0; height:112px;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 20px; z-index:40; pointer-events:none;
-  }
-  .top-bar .logo{pointer-events:auto}
-  .logo img{height:72px; transform:scale(1.15);} /* +15% */
-  .hero-title{
-    position:fixed; left:50%; transform:translateX(-50%); top:72px; z-index:40;
-    text-align:center; pointer-events:none;
-  }
-  .hero-title .main{font-weight:700;font-size:1.45rem;color:#0b2338}
-  .hero-title .sub{font-size:0.95rem;opacity:0.95;color:#0b2338;margin-top:6px}
+/* ---------------- HERO BACKGROUND ---------------- */
+.hero-bg {
+  position:fixed;
+  inset:0;
+  background:url("assets/chapel-hero.jpg") center/cover no-repeat;
+  filter:brightness(1.1);
+  z-index:-3;
+  background-attachment:fixed;
+}
 
-  /* pond-level glass area (two frosted boxes) */
-  .glass-zone{
-    position:relative;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:18px;
-    padding-top:60vh; /* keep them low on the screen (pond level) */
-    padding-bottom:6vh;
-  }
+.hero-overlay {
+  position:fixed;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,.04), rgba(0,0,0,.18));
+  z-index:-2;
+}
 
-  .glass{
-    width:min(1100px,94%);
-    max-width:1100px;
-    background: rgba(255,255,255,0.18);
-    border-radius:14px;
-    padding:22px 28px;
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
-    border:1px solid rgba(255,255,255,0.22);
-    box-shadow:0 10px 38px rgba(0,0,0,0.45);
-    color:#031026;
-    transform:translateY(28px);
-    opacity:0;
-    transition:opacity .9s cubic-bezier(.2,.9,.2,1), transform .9s cubic-bezier(.2,.9,.2,1);
-  }
-  .glass.revealed{ transform:translateY(0); opacity:1; }
+/* ---------------- TOP BAR ---------------- */
+.top-bar {
+  position:fixed; top:0; left:0; right:0;
+  height:108px;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 20px;
+  z-index:30;
+}
 
-  /* more transparent but readable text within */
-  .verse { font-style:italic; font-family:"Times New Roman",serif; font-size:1.05rem; line-height:1.6; color:rgba(5,25,30,0.92); text-align:center; }
-  .verse-ref{ display:block; margin-top:10px; font-size:0.9rem; opacity:0.92 }
+.logo img { height:70px; transform:scale(1.12); }
 
-  .ida-title{ font-family:"Times New Roman",serif; font-weight:600; text-align:center; font-size:1.02rem; margin-bottom:6px; color:#031026; }
-  .ida-preview{ font-family:"Times New Roman",serif; font-size:0.98rem; color:rgba(3,16,34,0.95); text-align:center; }
+/* ---------------- HERO TITLE ---------------- */
+.hero-title {
+  position:fixed;
+  top:72px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  transition:opacity .6s ease, transform .6s ease;
+  z-index:25;
+}
 
-  .hero-actions{ margin-top:8px; display:flex; gap:12px; justify-content:center; align-items:center; pointer-events:auto }
-  .link-btn{ padding:10px 16px; border-radius:999px; border:1px solid rgba(255,255,255,0.6); background:rgba(9,14,21,0.24); color:#f1f9ff; cursor:pointer; font-weight:600 }
-  .scroll-hint{ margin-left:12px; color:rgba(2,10,20,0.7); cursor:pointer; opacity:0.95 }
+.hero-title .main {
+  font-weight:700;
+  font-size:1.42rem;
+  color:#0b2338;
+}
 
-  /* passport area (stalls + auth + leaderboard) */
-  .passport{
-    background:transparent;
-    padding:48px 18px 80px;
-  }
-  .content-wrap{ max-width:1040px; width:96%; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+.hero-title .sub {
+  margin-top:6px;
+  font-size:0.95rem;
+  color:#0b2338;
+  opacity:0.95;
+}
 
-  .auth-card, .grid-card{ background:rgba(255,255,255,0.12); border-radius:14px; padding:18px; border:1px solid rgba(255,255,255,0.14); backdrop-filter: blur(8px); color:#eaf7ff; box-shadow:0 12px 36px rgba(0,0,0,0.45) }
+/* ---------------- FROSTED GLASS BOXES ---------------- */
+.glass-zone {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  padding-top:60vh;
+  padding-bottom:6vh;
+}
 
-  .auth-top{ display:flex; justify-content:space-between; align-items:center; gap:12px }
-  .pill{ display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(9,14,21,0.48); font-size:12px; letter-spacing:0.12em; color:#eaf7ff }
+.glass {
+  width:min(1100px,94%);
+  background:rgba(255,255,255,0.2);
+  border-radius:14px;
+  padding:24px 28px;
+  backdrop-filter:blur(10px) saturate(120%);
+  border:1px solid rgba(255,255,255,0.22);
+  box-shadow:0 12px 38px rgba(0,0,0,.45);
+  color:#031026;
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .9s cubic-bezier(.2,.9,.2,1),
+             transform .9s cubic-bezier(.2,.9,.2,1);
+}
 
-  input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(200,210,220,0.12); background:rgba(3,6,10,0.45); color:#eef7ff; margin-top:10px; font-size:0.95rem }
+.glass.revealed {
+  opacity:1;
+  transform:translateY(0);
+}
 
-  .auth-buttons{ display:flex; gap:10px; margin-top:12px }
-  .btn-register{ background:#9ad3bc; color:#043024; padding:10px 14px; border-radius:999px; border:none; cursor:pointer }
-  .btn-login{ background:#8bbcea; color:#06253b; padding:10px 14px; border-radius:999px; border:none; cursor:pointer }
-  .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.12); padding:8px 12px; border-radius:999px; color:#eaf7ff; cursor:pointer }
+.verse {
+  font-family:"Times New Roman",serif;
+  font-style:italic;
+  font-size:1.05rem;
+  color:rgba(5,25,30,.92);
+  text-align:center;
+  line-height:1.55;
+}
 
-  .grid-container{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; margin-top:12px }
-  .neon-stall{ padding:12px; border-radius:12px; background: radial-gradient(circle at top,#071025,#02101a 85%); border:1px solid rgba(34,211,238,0.48); color:#a8f6ff; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:0 10px 24px rgba(10,40,60,0.55); transition: transform 160ms ease, box-shadow 160ms ease }
-  .neon-stall:hover{ transform: translateY(-4px); box-shadow:0 18px 36px rgba(10,40,60,0.75) }
-  .neon-stall.visited{ border-color:rgba(74,222,128,0.95); background: linear-gradient(180deg,#032a16,#011212); color:#dfffe6 }
+.verse-ref {
+  display:block;
+  margin-top:8px;
+  font-size:0.9rem;
+  opacity:0.9;
+}
 
-  /* leaderboard */
-  #leaderboard{ margin-top:14px }
-  #leader-list{ margin-top:8px; font-size:0.92rem; color:#e8f6ff; max-height:260px; overflow:auto; padding-right:6px; text-align:left }
-  #leader-list .row{ display:flex; justify-content:space-between; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.03) }
+.ida-title {
+  font-family:"Times New Roman",serif;
+  font-weight:600;
+  font-size:1.02rem;
+  text-align:center;
+  color:#031026;
+}
 
-  /* QR overlay */
-  #qr-overlay{ position:fixed; inset:0; background:rgba(2,6,12,0.92); display:none; align-items:center; justify-content:center; z-index:130; padding:18px }
-  #qr-reader{ width:360px; max-width:96%; background:#000; border-radius:12px; overflow:hidden }
+.ida-preview {
+  font-family:"Times New Roman",serif;
+  text-align:center;
+  font-size:0.98rem;
+  color:rgba(3,16,34,.92);
+  margin-top:4px;
+}
 
-  /* toast */
-  #toast{ position:fixed; left:50%; transform:translateX(-50%) translateY(12px); bottom:28px; background:#021021; color:#e9f9ff; padding:10px 16px; border-radius:999px; opacity:0; pointer-events:none; z-index:200; transition:opacity .28s,transform .28s }
-  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
+.hero-actions {
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+}
 
-  /* small helpers */
-  .hidden{ display:none !important }
+.link-btn {
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.6);
+  background:rgba(9,14,21,.26);
+  color:#f1f9ff;
+  cursor:pointer;
+  font-weight:600;
+}
 
-  @media(max-width:820px){
-    .logo img{height:56px}
-    .hero-title .main{ font-size:1.25rem }
-    .glass{ padding:18px }
-    .hero-bg{ background-position: center 22% }
-  }
-  @media(max-width:420px){
-    .hero-title{ top:62px }
-    .verse{ font-size:0.95rem }
-  }
+.scroll-hint {
+  margin-left:12px;
+  opacity:0.9;
+  cursor:pointer;
+  color:rgba(2,10,20,.75);
+}
 
-  /* mobile vh fix */
-  :root{ --vh:1vh }
-  .fix-h{ height: calc(var(--vh) * 100) }
+/* ---------------- PASSPORT SECTION ---------------- */
+.passport {
+  background:transparent;
+  padding:48px 18px 80px;
+}
 
+.content-wrap {
+  width:96%;
+  max-width:1040px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* ---------------- AUTH + GRID CARDS ---------------- */
+.auth-card, .grid-card {
+  background:rgba(255,255,255,0.14);
+  border-radius:14px;
+  padding:20px;
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(9px);
+  color:#eaf7ff;
+  box-shadow:0 12px 36px rgba(0,0,0,.45);
+}
+
+/* ---------------- AUTH AREA FIXES ---------------- */
+.auth-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.pill {
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(9,14,21,.45);
+  font-size:12px;
+  letter-spacing:0.13em;
+}
+
+input {
+  width:100%;
+  padding:11px 12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(3,6,10,.48);
+  color:#eef7ff;
+  font-size:0.96rem;
+}
+
+.auth-buttons {
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.btn-register {
+  background:#9ad3bc;
+  color:#043024;
+  padding:10px 14px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-login {
+  background:#8bbcea;
+  color:#06253b;
+  padding:10px 14px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-ghost {
+  background:transparent;
+  border:1px solid rgba(255,255,255,.18);
+  padding:8px 12px;
+  border-radius:999px;
+  color:#eaf7ff;
+  cursor:pointer;
+}
+
+/* ---------------- STALL GRID FIXES (A) ---------------- */
+.grid-container {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(120px,1fr));
+  gap:14px;
+  margin-top:14px;
+}
+
+.neon-stall {
+  padding:14px 10px;
+  border-radius:12px;
+  background:radial-gradient(circle at top, #071025, #02101a 90%);
+  border:1px solid rgba(34,211,238,0.55);
+  color:#a8f6ff;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  box-shadow:0 10px 24px rgba(10,40,60,.55);
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+
+.neon-stall:hover {
+  transform:translateY(-4px);
+  box-shadow:0 16px 32px rgba(10,40,60,.75);
+}
+
+.neon-stall.visited {
+  border-color:rgba(74,222,128,.95);
+  background:linear-gradient(180deg,#032a16,#011212);
+  color:#dfffe6;
+}
+
+/* ---------------- LEADERBOARD ---------------- */
+#leader-list {
+  margin-top:10px;
+  max-height:260px;
+  overflow:auto;
+  padding-right:6px;
+  font-size:0.92rem;
+}
+
+#leader-list .row {
+  display:flex;
+  justify-content:space-between;
+  padding:8px 6px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+/* ---------------- QR OVERLAY (B) ---------------- */
+#qr-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:200;
+  padding:20px;
+}
+
+#qr-reader {
+  width:90vw;
+  max-width:420px;
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 0 40px rgba(0,255,255,0.35);
+}
+
+/* ---------------- TOAST ---------------- */
+#toast {
+  position:fixed;
+  left:50%; bottom:28px;
+  transform:translateX(-50%) translateY(10px);
+  background:#021021;
+  color:#e9f9ff;
+  padding:10px 16px;
+  border-radius:999px;
+  opacity:0;
+  pointer-events:none;
+  z-index:300;
+  transition:opacity .25s, transform .25s;
+}
+
+#toast.show {
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* ---------------- UTILS ---------------- */
+.hidden { display:none !important; }
+
+/* ---------------- MOBILE FIXES ---------------- */
+@media(max-width:820px) {
+  .logo img {height:56px;}
+  .hero-title .main {font-size:1.28rem;}
+  .hero-bg {background-position:center 20%;}
+}
+
+@media(max-width:420px) {
+  .hero-title {top:60px;}
+  .verse {font-size:0.96rem;}
+}
+
+/* Mobile full-height fix */
+:root { --vh:1vh; }
+.fix-h { height:calc(var(--vh) * 100); }
 </style>
 </head>
 <body>
 
-  <!-- hero background + overlays -->
-  <div class="hero-bg" aria-hidden="true"></div>
-  <div class="hero-overlay" aria-hidden="true"></div>
+<!-- hero background layers -->
+<div class="hero-bg" aria-hidden="true"></div>
+<div class="hero-overlay" aria-hidden="true"></div>
 
-  <!-- top logos & title (fixed) -->
-  <div class="top-bar" role="banner">
-    <div class="logo left logo-row" style="pointer-events:auto">
-      <img src="assets/iria2025.png" alt="IRIA">
-    </div>
-    <div class="logo right logo-row" style="pointer-events:auto">
-      <img src="assets/cmc.png" alt="CMC">
+<!-- fixed top logos -->
+<div class="top-bar" role="banner">
+  <div class="logo left">
+    <img src="assets/iria2025.png" alt="IRIA">
+  </div>
+  <div class="logo right">
+    <img src="assets/cmc.png" alt="CMC">
+  </div>
+</div>
+
+<!-- fixed hero title -->
+<div class="hero-title" aria-hidden="true">
+  <div class="main">Welcome to the 78th Annual TNPY IRIA Conference</div>
+  <div class="sub">at Christian Medical College, Vellore</div>
+</div>
+
+<!-- empty hero area (shows chapel background) -->
+<main class="hero-wrap fix-h" id="hero">
+  <div style="width:100%;height:1px"></div>
+</main>
+
+<!-- FROSTED GLASS BOXES -->
+<section class="glass-zone" id="glass-zone">
+
+  <!-- Glass 1 -->
+  <div class="glass" id="verseGlass">
+    <div class="verse">
+      “Even as the Son of man came not to be ministered unto, but to minister,
+      and to give his life a ransom for many.”
+      <span class="verse-ref">Matthew 20:28</span>
     </div>
   </div>
 
-  <div class="hero-title" aria-hidden="true">
-    <div class="main">Welcome to the 78th Annual TNPY IRIA Conference</div>
-    <div class="sub">at Christian Medical College, Vellore</div>
+  <!-- Glass 2 -->
+  <div class="glass" id="idaGlass">
+    <div class="ida-title">Aunt Ida’s Prayer</div>
+    <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
+
+    <div class="hero-actions">
+      <button class="link-btn" id="openPrayerBtn">Read full prayer</button>
+      <div class="scroll-hint" id="scrollToPassport">Scroll to begin the Stall Grid Contest ↓</div>
+    </div>
   </div>
 
-  <!-- hero visible area (main initial viewport) -->
-  <main class="hero-wrap fix-h" id="hero">
-    <!-- empty - background shows -->
-    <div style="width:100%;height:1px"></div>
-  </main>
+</section>
 
-  <!-- glass zone (pond-level) - two boxes -->
-  <section class="glass-zone" id="glass-zone">
-    <div class="glass" id="verseGlass" aria-hidden="false">
-      <div class="verse">“Even as the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many.”<span class="verse-ref">Matthew 20:28</span></div>
-    </div>
+<!-- PASSPORT (AUTH + GRID + LEADERBOARD) -->
+<section id="passport" class="passport panel">
+  <div class="content-wrap">
 
-    <div class="glass" id="idaGlass" aria-hidden="false">
-      <div class="ida-title">Aunt Ida’s Prayer</div>
-      <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
-      <div class="hero-actions" style="justify-content:center">
-        <button class="link-btn" id="openPrayerBtn">Read the full prayer</button>
-        <div class="scroll-hint" id="scrollToPassport">Scroll to start the Stall Grid Contest ↓</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- passport / stalls / auth -->
-  <section id="passport" class="passport panel">
-    <div class="content-wrap">
-
-      <div class="auth-card" id="auth-card">
-        <div class="auth-top">
-          <div>
-            <div class="pill">Delegate Login</div>
-            <div style="font-size:1rem;font-weight:700;margin-top:6px">Access Your Stall Grid Passport</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div id="auth-status">Not signed in</div>
-            <div id="logout-wrap" class="hidden"><button class="btn-ghost" id="logoutBtn">Logout</button></div>
+    <!-- AUTH CARD -->
+    <div class="auth-card" id="auth-card">
+      <div class="auth-top">
+        <div>
+          <div class="pill">Conference Access</div>
+          <div style="font-size:1rem;font-weight:700;margin-top:6px">Sign in to access your Passport</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="auth-status">Not signed in</div>
+          <div id="logout-wrap" class="hidden">
+            <button class="btn-ghost" id="logoutBtn">Logout</button>
           </div>
         </div>
-
-        <input id="name-input" placeholder="Name (as registration)" autocomplete="name" />
-        <input id="email-input" placeholder="Email (same as registration)" autocomplete="email" />
-        <input id="delegate-input" placeholder="Delegate ID (optional)" />
-        <input id="password-input" type="password" placeholder="Password" autocomplete="current-password"/>
-
-        <div class="auth-buttons">
-          <button class="btn-register" id="registerBtn">Register</button>
-          <button class="btn-login" id="loginBtn">Login</button>
-          <button class="btn-ghost" id="forgotBtn">Forgot?</button>
-        </div>
-        <p style="margin-top:12px;font-size:0.9rem;color:rgba(235,245,255,0.9)">Use the same name and email as your conference registration to be eligible for prizes.</p>
       </div>
 
-      <div class="grid-card hidden" id="grid-card">
+      <!-- UPDATED INPUT LABELS -->
+      <input id="name-input" placeholder="Full Name (as per registration)" autocomplete="name" />
+      <input id="email-input" placeholder="Email Address" autocomplete="email" />
+      <input id="delegate-input" placeholder="Registration ID (required)" autocomplete="off" />
+      <input id="password-input" type="password" placeholder="Password" autocomplete="current-password"/>
+
+      <div class="auth-buttons">
+        <button class="btn-register" id="registerBtn">Register</button>
+        <button class="btn-login" id="loginBtn">Login</button>
+        <button class="btn-ghost" id="forgotBtn">Forgot?</button>
+      </div>
+
+      <!-- UPDATED NOTE (Option B) -->
+      <p style="margin-top:12px;font-size:0.9rem;color:rgba(235,245,255,0.9)">
+        Log in using the email and Registration ID from your official CMC IRIA 2025 registration.
+        Verified delegates are eligible for leaderboard rankings and prizes.
+      </p>
+    </div>
+
+    <!-- GRID CARD -->
+    <div class="grid-card hidden" id="grid-card">
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="pill">Stall Grid</div>
+          <div style="font-size:0.98rem;font-weight:600;margin-top:6px;">
+            Scan QR at Each Exhibitor
+          </div>
+          <p style="font-size:0.88rem;opacity:0.95;margin-top:6px;">
+            Tap a stall tile to open the camera. After scanning, your visit will be recorded instantly.
+          </p>
+        </div>
+
+        <div>
+          <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
+        </div>
+      </div>
+
+      <!-- USER BANNER (SHOWS REG ID) -->
+      <div id="user-banner" class="hidden" style="margin-top:12px;font-weight:700"></div>
+
+      <!-- 35 stall grid -->
+      <div id="grid" class="grid-container" aria-live="polite"></div>
+
+      <!-- LEADERBOARD -->
+      <div id="leaderboard" style="margin-top:20px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div class="pill">Stall Grid</div>
-            <div style="font-size:0.98rem;font-weight:600;margin-top:6px;">Scan QR at Each Exhibitor</div>
-            <p style="font-size:0.88rem;opacity:0.95;margin-top:6px;">Tap a stall tile to open the camera. After scanning, your visit will be recorded and reflected on the leaderboard.</p>
-          </div>
-          <div><button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button></div>
-        </div>
-
-        <div id="user-banner" style="margin-top:10px;font-weight:700" class="hidden"></div>
-
-        <div id="grid" class="grid-container" aria-live="polite" style="margin-top:12px"></div>
-
-        <div id="leaderboard" style="margin-top:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="pill">Leaderboard</div>
-              <div style="font-size:0.95rem;font-weight:600;margin-top:6px;">Most Active Stall Explorers</div>
+            <div class="pill">Leaderboard</div>
+            <div style="font-size:0.95rem;font-weight:600;margin-top:6px;">
+              Most Active Stall Explorers
             </div>
           </div>
-          <div id="leader-list"></div>
         </div>
+
+        <div id="leader-list"></div>
       </div>
 
     </div>
-  </section>
 
-  <!-- QR overlay -->
-  <div id="qr-overlay" aria-hidden="true">
-    <div id="qr-reader"></div>
-    <div style="margin-top:12px"><button class="btn-ghost" id="qr-close">Close</button></div>
   </div>
+</section>
 
-  <!-- prayer modal -->
-  <div id="prayer-modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,12,0.7);z-index:220;padding:12px">
-    <div style="background:rgba(255,255,255,0.98);color:#031025;padding:18px;border-radius:12px;max-width:720px;max-height:82vh;overflow:auto">
-      <h3 style="font-family:Times New Roman,serif;font-style:italic">Aunt Ida’s Prayer</h3>
-      <div style="font-family:Times New Roman,serif;font-style:italic;line-height:1.5">
-        Father, whose life is within me, and whose love is ever about me...
-        <p style="margin-top:8px">... (full prayer text here)</p>
-      </div>
-      <div style="text-align:right;margin-top:8px"><button class="link-btn" id="closePrayerBtn">Close</button></div>
+<!-- QR SCAN OVERLAY -->
+<div id="qr-overlay">
+  <div id="qr-reader"></div>
+  <button class="btn-ghost" id="qr-close" style="margin-top:14px;">Close</button>
+</div>
+
+<!-- PRAYER MODAL -->
+<div id="prayer-modal" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.72);
+  display:none; align-items:center; justify-content:center;
+  z-index:220; padding:16px;
+">
+  <div style="
+    background:#fff; color:#031026; padding:20px;
+    border-radius:12px; max-width:720px; max-height:80vh; overflow:auto;
+  ">
+    <h3 style="font-family:'Times New Roman',serif;font-style:italic;">Aunt Ida’s Prayer</h3>
+
+    <div style="font-family:'Times New Roman',serif;font-style:italic;line-height:1.5;">
+      Father, whose life is within me, and whose love is ever about me...
+      <p style="margin-top:8px">… (full prayer text here)</p>
+    </div>
+
+    <div style="text-align:right;margin-top:12px;">
+      <button class="link-btn" id="closePrayerBtn">Close</button>
     </div>
   </div>
+</div>
 
-  <div id="toast" role="status"></div>
-
+<!-- Toast -->
+<div id="toast"></div>
 <script type="module">
 /* ---------- MOBILE VH FIX ---------- */
-function setRealVH(){
-  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+function setRealVH() {
+  document.documentElement.style.setProperty("--vh", window.innerHeight * 0.01 + "px");
 }
 setRealVH();
-window.addEventListener('resize', setRealVH);
-window.addEventListener('orientationchange', setRealVH);
+window.addEventListener("resize", setRealVH);
+window.addEventListener("orientationchange", setRealVH);
 
 /* ---------- CONFIG ---------- */
-const API_BASE = 'https://cmc-iria-secure.onrender.com'; // your Render backend
-const DEFAULT_STALL_COUNT = 15; // change later if needed
+const API_BASE = "https://cmc-iria-secure.onrender.com";
+const DEFAULT_STALL_COUNT = 35;
 
 /* ---------- ELEMENTS ---------- */
-const verseGlass = document.getElementById('verseGlass');
-const idaGlass = document.getElementById('idaGlass');
-const scrollToPassport = document.getElementById('scrollToPassport');
-const heroTitle = document.querySelector('.hero-title');
-const authCard = document.getElementById('auth-card');
-const gridCard = document.getElementById('grid-card');
-const gridEl = document.getElementById('grid');
-const leaderListEl = document.getElementById('leader-list');
-const userBanner = document.getElementById('user-banner');
-const authStatus = document.getElementById('auth-status');
-const logoutWrap = document.getElementById('logout-wrap');
-const qrOverlay = document.getElementById('qr-overlay');
-const qrReader = document.getElementById('qr-reader');
-const toastEl = document.getElementById('toast');
+const authCard = document.getElementById("auth-card");
+const gridCard = document.getElementById("grid-card");
+const gridEl = document.getElementById("grid");
+const leaderListEl = document.getElementById("leader-list");
+const userBanner = document.getElementById("user-banner");
+const authStatus = document.getElementById("auth-status");
+const logoutWrap = document.getElementById("logout-wrap");
+const qrOverlay = document.getElementById("qr-overlay");
+const qrReader = document.getElementById("qr-reader");
+const toastEl = document.getElementById("toast");
 
-/* inputs/buttons */
-const nameInput = document.getElementById('name-input');
-const emailInput = document.getElementById('email-input');
-const passInput = document.getElementById('password-input');
-const delegateInput = document.getElementById('delegate-input');
-const registerBtn = document.getElementById('registerBtn');
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const forgotBtn = document.getElementById('forgotBtn');
-const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn');
-const openPrayerBtn = document.getElementById('openPrayerBtn');
-const closePrayerBtn = document.getElementById('closePrayerBtn');
+/* Form Inputs */
+const nameInput = document.getElementById("name-input");
+const emailInput = document.getElementById("email-input");
+const regIdInput = document.getElementById("delegate-input");
+const passInput = document.getElementById("password-input");
 
-const openScannerButtons = {}; // stallName -> handler
+/* Buttons */
+const registerBtn = document.getElementById("registerBtn");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const forgotBtn = document.getElementById("forgotBtn");
+const refreshLeaderboardBtn = document.getElementById("refreshLeaderboardBtn");
+const openPrayerBtn = document.getElementById("openPrayerBtn");
+const closePrayerBtn = document.getElementById("closePrayerBtn");
+const scrollToPassport = document.getElementById("scrollToPassport");
 
 /* ---------- STATE ---------- */
-let jwtToken = localStorage.getItem('jwt') || null;
-let delegateId = localStorage.getItem('delegateId') || null;
-let currentName = localStorage.getItem('name') || null;
+let jwtToken = localStorage.getItem("jwt") || null;
+let delegateId = localStorage.getItem("delegateId") || null;
+let regId = localStorage.getItem("regId") || null;
+let currentName = localStorage.getItem("name") || null;
 
 /* ---------- TOAST ---------- */
-function showToast(msg){
+function showToast(msg) {
   toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  toastEl.style.opacity = '1';
-  setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.style.opacity='0' },2200);
+  toastEl.classList.add("show");
+  setTimeout(() => toastEl.classList.remove("show"), 2000);
 }
 
-/* ---------- AUTH helpers ---------- */
-async function apiFetch(path, opts = {}){
+/* ---------- API WRAPPER ---------- */
+async function apiFetch(path, opts = {}) {
   const headers = opts.headers || {};
-  headers['Content-Type'] = 'application/json';
-  if(jwtToken) headers['Authorization'] = 'Bearer ' + jwtToken;
+  headers["Content-Type"] = "application/json";
+  if (jwtToken) headers["Authorization"] = "Bearer " + jwtToken;
   opts.headers = headers;
-  opts.credentials = 'omit';
-  try{
-    const res = await fetch(API_BASE + path, opts);
-    const txt = await res.text();
-    let data;
-    try{ data = txt ? JSON.parse(txt) : null; }catch(e){ data = txt; }
-    if(!res.ok) throw data || {error:'Request failed', status: res.status};
-    return data;
-  }catch(e){
-    throw e;
+
+  const res = await fetch(API_BASE + path, opts);
+  const raw = await res.text();
+  let data;
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = raw;
+  }
+
+  if (!res.ok) throw data;
+  return data;
+}
+
+/* ---------- UPDATE UI ---------- */
+function updateUIForAuth() {
+  if (jwtToken && delegateId) {
+    authStatus.textContent = `Signed in as ${currentName}`;
+    logoutWrap.classList.remove("hidden");
+    authCard.classList.add("hidden");
+    gridCard.classList.remove("hidden");
+
+    userBanner.classList.remove("hidden");
+    userBanner.textContent = `${currentName} — Reg ID: ${regId}`;
+  } else {
+    authStatus.textContent = "Not signed in";
+    logoutWrap.classList.add("hidden");
+    authCard.classList.remove("hidden");
+    gridCard.classList.add("hidden");
+    userBanner.classList.add("hidden");
   }
 }
 
-/* ---------- REGISTER / LOGIN ---------- */
-registerBtn?.addEventListener('click', async ()=>{
+/* ---------- REGISTER ---------- */
+registerBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
+  const regIdVal = regIdInput.value.trim();
   const pass = passInput.value.trim();
-  if(!email || !pass){ alert('Email and password are required'); return; }
-  try{
-    const payload = { email, password: pass, name };
-    const data = await apiFetch('/api/signup', { method:'POST', body: JSON.stringify(payload) });
-    jwtToken = data.token;
-    delegateId = data.delegateId;
-    currentName = data.name || name || email;
-    localStorage.setItem('jwt', jwtToken);
-    localStorage.setItem('delegateId', delegateId);
-    localStorage.setItem('name', currentName);
-    showToast('Registered & signed in');
-    updateUIForAuth();
-    await loadUserVisitsAndLeaderboard();
-    gridCard.classList.remove('hidden');
-    document.getElementById('passport').scrollIntoView({behavior:'smooth'});
-  }catch(e){
-    console.error(e);
-    alert(e && e.error ? e.error : (e.message||String(e)));
-  }
-});
 
-loginBtn?.addEventListener('click', async ()=>{
-  const email = emailInput.value.trim();
-  const pass = passInput.value.trim();
-  if(!email || !pass){ alert('Enter email and password'); return; }
-  try{
-    const data = await apiFetch('/api/login', { method:'POST', body: JSON.stringify({ email, password: pass }) });
-    jwtToken = data.token;
-    delegateId = data.delegateId;
-    currentName = data.name || email;
-    localStorage.setItem('jwt', jwtToken);
-    localStorage.setItem('delegateId', delegateId);
-    localStorage.setItem('name', currentName);
-    showToast('Logged in');
-    updateUIForAuth();
-    gridCard.classList.remove('hidden');
-    await loadUserVisitsAndLeaderboard();
-    document.getElementById('passport').scrollIntoView({behavior:'smooth'});
-  }catch(e){
-    console.error(e);
-    alert(e && e.error ? e.error : (e.message||String(e)));
-  }
-});
-
-logoutBtn?.addEventListener('click', ()=>{
-  jwtToken = null;
-  delegateId = null;
-  currentName = null;
-  localStorage.removeItem('jwt'); localStorage.removeItem('delegateId'); localStorage.removeItem('name');
-  updateUIForAuth();
-  gridCard.classList.add('hidden');
-  clearVisitedStalls();
-  leaderListEl.innerHTML = '';
-  showToast('Logged out');
-});
-
-/* forgot password - will call /api/request-reset if available (optional) */
-forgotBtn?.addEventListener('click', async ()=>{
-  const email = emailInput.value.trim();
-  if(!email){ alert('Enter the email used to register'); return; }
-  try{
-    const resp = await apiFetch('/api/request-reset', { method:'POST', body: JSON.stringify({ email }) });
-    alert('If your email exists, a reset token was generated. Follow instructions.');
-  }catch(e){
-    console.warn('reset not supported', e);
-    alert('Reset token endpoint not available on backend. You can ask admin to reset password on the server.');
-  }
-});
-
-/* ---------- UI state update ---------- */
-function updateUIForAuth(){
-  if(jwtToken && delegateId){
-    authStatus.textContent = `Signed in as ${currentName || delegateId}`;
-    logoutWrap.classList.remove('hidden');
-    authCard.classList.add('hidden');
-    gridCard.classList.remove('hidden');
-    userBanner.classList.remove('hidden');
-    userBanner.textContent = `Welcome, ${currentName || delegateId}${delegateId ? ' (ID: ' + delegateId + ')' : ''}`;
-  }else{
-    authStatus.textContent = 'Not signed in';
-    logoutWrap.classList.add('hidden');
-    authCard.classList.remove('hidden');
-    gridCard.classList.add('hidden');
-    userBanner.classList.add('hidden');
-  }
-}
-
-/* ---------- STALL GRID (static generation) ---------- */
-function createStallCard(id){
-  const div = document.createElement('div');
-  div.className = 'neon-stall';
-  div.dataset.stallId = id;
-  div.innerHTML = `<div style="font-size:0.95rem">${id}</div><div style="font-size:0.78rem;opacity:0.9">Tap to scan</div>`;
-  div.addEventListener('click', ()=>openScanner(id));
-  gridEl.appendChild(div);
-}
-function buildGrid(count = DEFAULT_STALL_COUNT){
-  gridEl.innerHTML = '';
-  for(let i=1;i<=count;i++){
-    createStallCard('Stall ' + i);
-  }
-}
-
-/* ---------- VISITS / LEADERBOARD ---------- */
-async function loadUserVisitsAndLeaderboard(){
-  try{
-    if(jwtToken && delegateId){
-      // load visits
-      const v = await apiFetch(`/api/visits/${delegateId}`, { method:'GET' });
-      if(v && v.visits){
-        const set = new Set(v.visits.map(x=>String(x)));
-        document.querySelectorAll('.neon-stall').forEach(card=>{
-          const sid = card.dataset.stallId;
-          const numeric = sid.replace(/[^0-9]/g,'');
-          if(set.has(sid) || set.has(numeric)){
-            card.classList.add('visited');
-            card.innerHTML = `<div style="font-size:0.95rem">${sid} ✓</div><div style="font-size:0.78rem;opacity:0.9">Visited</div>`;
-          }
-        });
-      }
-    }
-  }catch(e){
-    console.warn('loadUserVisits failed', e);
-  }
-  // always refresh leaderboard
-  await loadLeaderboard();
-}
-
-async function loadLeaderboard(){
-  leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.9)">Loading…</div>';
-  try{
-    const data = await apiFetch('/api/leaderboard', { method:'GET' });
-    const rows = data && data.top ? data.top : (Array.isArray(data) ? data : []);
-    if(!rows || rows.length===0){ leaderListEl.innerHTML = '<div style="padding:8px 0;color:rgba(240,248,255,0.7)">No visits recorded yet.</div>'; return; }
-    leaderListEl.innerHTML = '';
-    rows.forEach((r,i)=>{
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.innerHTML = `<div style="font-weight:700">${i+1}. ${r.name || r.delegateId}</div><div style="opacity:0.9">${r.count || r.cnt || r.counts || 0} stall${(r.count||r.cnt||0)===1 ? '' : 's'}</div>`;
-      leaderListEl.appendChild(row);
-    });
-  }catch(e){
-    console.error('Leaderboard error', e);
-    leaderListEl.innerHTML = '<div style="padding:8px 0;color:#ffdddd">Error loading leaderboard.</div>';
-  }
-}
-
-/* ---------- AUTO-DETECT STATIC QR & DO SECURE FLOW ---------- */
-async function checkQRVisit() {
-  const params = new URLSearchParams(window.location.search);
-  const stallParam = params.get("stall");
-  const expParam = params.get("exp");
-  const tokenParam = params.get("token");
-
-  // If no stall in URL -> nothing to do
-  if (!stallParam) return;
-
-  // If the QR already includes token & exp (unlikely in hybrid), we can directly verify
-  if (tokenParam && expParam) {
-    // existing verify path (requires auth)
-    if (!jwtToken) {
-      alert("Please log in first before verifying a QR.");
-      return;
-    }
-    try {
-      const res = await apiFetch("/api/verify", {
-        method: "POST",
-        body: JSON.stringify({ stall: Number(stallParam) || stallParam, exp: expParam, token: tokenParam })
-      });
-      if (res && res.ok) {
-        showToast(`Stall ${stallParam} stamped successfully!`);
-        await loadUserVisitsAndLeaderboard();
-      } else {
-        alert("Verification failed: " + (res && res.error ? res.error : "unknown"));
-      }
-    } catch (e) {
-      alert("Network error verifying stamp.");
-    }
-    return;
-  }
-
-  // HYBRID FLOW: static exhibitor QR contains only ?stall=#
-  // Must be logged in to request a per-delegate token
-  if (!jwtToken) {
-    alert("Please log in first to record your visit for this stall.");
+  if (!email || !pass || !regIdVal) {
+    alert("Email, Registration ID, and password are required.");
     return;
   }
 
   try {
-    // 1) Request per-delegate visit token (short-lived) from backend
-    const t = await apiFetch("/api/generate-visit-token", {
+    const payload = { name, email, password: pass, regId: regIdVal };
+    const data = await apiFetch("/api/signup", {
       method: "POST",
-      body: JSON.stringify({ stall: Number(stallParam) || stallParam })
+      body: JSON.stringify(payload),
     });
-    if (!t || !t.ok) {
-      alert("Could not get visit token: " + (t && t.error ? t.error : "unknown"));
+
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    regId = regIdVal;
+    currentName = data.name || name || email;
+
+    localStorage.setItem("jwt", jwtToken);
+    localStorage.setItem("delegateId", delegateId);
+    localStorage.setItem("regId", regIdVal);
+    localStorage.setItem("name", currentName);
+
+    showToast("Registered & logged in!");
+    updateUIForAuth();
+    await loadUserVisitsAndLeaderboard();
+
+    document.getElementById("passport").scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    alert(e.error || e.message || "Registration failed.");
+  }
+});
+
+/* ---------- LOGIN ---------- */
+loginBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
+
+  if (!email || !pass) {
+    alert("Enter email and password.");
+    return;
+  }
+
+  try {
+    const data = await apiFetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password: pass }),
+    });
+
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    currentName = data.name || email;
+
+    localStorage.setItem("jwt", jwtToken);
+    localStorage.setItem("delegateId", delegateId);
+    localStorage.setItem("name", currentName);
+
+    showToast("Logged in!");
+    updateUIForAuth();
+    await loadUserVisitsAndLeaderboard();
+
+    document.getElementById("passport").scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    alert(e.error || "Login failed.");
+  }
+});
+
+/* ---------- LOGOUT ---------- */
+logoutBtn.addEventListener("click", () => {
+  jwtToken = null;
+  delegateId = null;
+  regId = null;
+  currentName = null;
+
+  localStorage.removeItem("jwt");
+  localStorage.removeItem("delegateId");
+  localStorage.removeItem("regId");
+  localStorage.removeItem("name");
+
+  showToast("Logged out.");
+  updateUIForAuth();
+  clearVisitedStalls();
+  leaderListEl.innerHTML = "";
+});
+
+/* ---------- FORGOT PASSWORD ---------- */
+forgotBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  if (!email) {
+    alert("Enter your registered email.");
+    return;
+  }
+  try {
+    await apiFetch("/api/request-reset", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    alert("If registered, a reset OTP has been created.");
+  } catch {
+    alert("Reset not available.");
+  }
+});
+
+/* ---------- BUILD STALL GRID ---------- */
+function createStallCard(id) {
+  const tile = document.createElement("div");
+  tile.className = "neon-stall";
+  tile.dataset.stallId = id;
+  tile.innerHTML = `<div style="font-size:1rem">${id}</div><div style="font-size:0.8rem;opacity:0.85">Tap to scan</div>`;
+  tile.addEventListener("click", () => openScanner(id));
+  gridEl.appendChild(tile);
+}
+
+function buildGrid(count) {
+  gridEl.innerHTML = "";
+  for (let i = 1; i <= count; i++) {
+    createStallCard(`Stall ${i}`);
+  }
+}
+
+/* ---------- VISITS + LEADERBOARD ---------- */
+async function loadUserVisitsAndLeaderboard() {
+  if (jwtToken && delegateId) {
+    try {
+      const v = await apiFetch(`/api/visits/${delegateId}`, { method: "GET" });
+      if (v.visits) {
+        const visited = new Set(v.visits.map(String));
+        document.querySelectorAll(".neon-stall").forEach((card) => {
+          const num = card.dataset.stallId.replace("Stall ", "");
+          if (visited.has(num)) {
+            card.classList.add("visited");
+            card.innerHTML = `<div style="font-size:1rem">${card.dataset.stallId} ✓</div>
+                              <div style="font-size:0.8rem;opacity:0.85">Visited</div>`;
+          }
+        });
+      }
+    } catch {}
+  }
+  await loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  leaderListEl.innerHTML = "<div style='padding:8px'>Loading…</div>";
+  try {
+    const data = await apiFetch("/api/leaderboard", { method: "GET" });
+    const rows = data.top || [];
+
+    if (!rows.length) {
+      leaderListEl.innerHTML = "<div style='padding:8px;opacity:0.8'>No visits yet.</div>";
       return;
     }
 
-    // 2) immediately verify using returned token + exp
-    const verify = await apiFetch("/api/verify", {
-      method: "POST",
-      body: JSON.stringify({ stall: Number(stallParam) || stallParam, exp: t.exp, token: t.token })
+    leaderListEl.innerHTML = "";
+    rows.forEach((r, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div style="font-weight:700">${i + 1}. ${r.name}</div>
+        <div>${r.count} stalls</div>`;
+      leaderListEl.appendChild(row);
     });
-
-    if (verify && verify.ok) {
-      showToast(`Stall ${stallParam} stamped successfully!`);
-      markStallVisited("Stall " + stallParam);
-      await loadUserVisitsAndLeaderboard();
-    } else {
-      alert("Verification failed: " + (verify && verify.error ? verify.error : "unknown"));
-    }
-  } catch (e) {
-    console.error("Hybrid QR flow failed", e);
-    alert("Error during QR verification: " + (e && e.error ? e.error : (e.message || String(e))));
+  } catch {
+    leaderListEl.innerHTML = "<div style='padding:8px;color:#fdd'>Error loading leaderboard</div>";
   }
 }
 
-// Run this automatically when page loads
-window.addEventListener("DOMContentLoaded", checkQRVisit);
+refreshLeaderboardBtn.addEventListener("click", () => {
+  loadLeaderboard().then(() => showToast("Leaderboard refreshed"));
+});
 
-/* ---------- QR SCAN ---------- */
+/* ---------- QR SCANNING ---------- */
 let html5QrInstance = null;
-let currentStallName = null;
 
-async function openScanner(stallName){
-  if(!jwtToken || !delegateId){ alert('Please login first to record visits.'); return; }
-  currentStallName = stallName;
-  qrOverlay.style.display = 'flex';
-  const regionId = 'qr-reader';
-  try{
-    if(!html5QrInstance) html5QrInstance = new Html5Qrcode(regionId);
-    try{ await html5QrInstance.stop(); }catch(_){}
+async function openScanner(stallName) {
+  if (!jwtToken) {
+    alert("Please log in first.");
+    return;
+  }
+
+  qrOverlay.style.display = "flex";
+
+  try {
+    if (!html5QrInstance) html5QrInstance = new Html5Qrcode("qr-reader");
+
+    try {
+      await html5QrInstance.stop();
+    } catch {}
+
     await html5QrInstance.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      async (decodedText) => {
-        try{ await html5QrInstance.stop(); }catch(_){}
-        qrOverlay.style.display = 'none';
-        await handleDecodedQR(decodedText);
-      },
-      (err)=>{ /* ignore decode failures */ }
-    );
-  }catch(err){
-    qrOverlay.style.display = 'none';
-    alert('Camera error: ' + (err.message||err));
-  }
-}
-
-async function closeScanner(){
-  qrOverlay.style.display = 'none';
-  if(html5QrInstance){
-    try{ await html5QrInstance.stop(); }catch(_){}
-  }
-}
-
-function parseQueryString(qs){
-  const out = {};
-  qs.split('&').forEach(pair=>{
-    const [k,v] = pair.split('=');
-    if(k) out[decodeURIComponent(k)] = decodeURIComponent(v||'');
-  });
-  return out;
-}
-
-async function handleDecodedQR(decoded){
-  // If the QR contains a full URL with query params, extract the query part
-  let q = decoded;
-  try{
-    const u = new URL(decoded);
-    q = u.search.slice(1);
-  }catch(_){}
-  // Now parse `stall=...&delegate=...&exp=...&token=...`
-  const parts = parseQueryString(q);
-  const stall = parts.stall || currentStallName || parts.stallId;
-  const token = parts.token || parts.sig || parts.signature;
-  const exp = parts.exp || parts.expiry;
-  if(!stall){
-    alert('Invalid QR payload. Make sure this QR was generated by the event system.');
-    return;
-  }
-
-  // If QR only contains stall (static exhibitor QR), go hybrid flow:
-  if(!token || !exp){
-    // same logic as checkQRVisit when logged-in
-    if(!jwtToken){ alert('Please login first to record visits.'); return; }
-    try{
-      const t = await apiFetch('/api/generate-visit-token', { method:'POST', body: JSON.stringify({ stall: Number(stall) || stall }) });
-      if(!t || !t.ok){ alert('Could not get token'); return; }
-      const res = await apiFetch('/api/verify', { method:'POST', body: JSON.stringify({ stall: Number(stall) || stall, exp: t.exp, token: t.token }) });
-      if(res && res.ok){
-        markStallVisited('Stall ' + stall);
-        showToast(`Recorded visit: ${stall}`);
-        await loadUserVisitsAndLeaderboard();
-      }else{
-        alert((res && res.error) ? res.error : 'Verification failed');
+      { fps: 10, qrbox: calcQRBox() },
+      async (decoded) => {
+        try { await html5QrInstance.stop(); } catch {}
+        qrOverlay.style.display = "none";
+        await processDecodedQR(stallName, decoded);
       }
-    }catch(e){
-      console.error('verify failed', e);
-      alert(e && e.error ? e.error : (e.message||String(e)));
-    }
+    );
+  } catch (err) {
+    qrOverlay.style.display = "none";
+    alert("Camera error: " + err);
+  }
+}
+
+function calcQRBox() {
+  return Math.floor(Math.min(window.innerWidth, 420) * 0.75);
+}
+
+document.getElementById("qr-close").addEventListener("click", async () => {
+  qrOverlay.style.display = "none";
+  try { await html5QrInstance.stop(); } catch {}
+});
+
+/* ---------- QR DECODING & HYBRID FLOW ---------- */
+async function processDecodedQR(stallName, decoded) {
+  let url = null;
+
+  try {
+    url = new URL(decoded);
+  } catch {
+    alert("Invalid QR");
     return;
   }
 
-  // If QR already contains token+exp (edge cases), use existing verify flow:
-  try{
-    const body = { stall: Number(stall) || stall, token, exp };
-    const res = await apiFetch('/api/verify', { method:'POST', body: JSON.stringify(body) });
-    if(res && res.ok){
-      markStallVisited(stall);
-      showToast(`Recorded visit: ${stall}`);
-      await loadUserVisitsAndLeaderboard();
-    }else{
-      alert((res && res.error) ? res.error : 'Verification failed');
+  const stall = url.searchParams.get("stall") || stallName;
+  const exp = url.searchParams.get("exp");
+  const token = url.searchParams.get("token");
+
+  if (!stall) {
+    alert("Invalid stall QR.");
+    return;
+  }
+
+  // HYBRID FLOW: static QR → request token → auto verify
+  if (!token || !exp) {
+    try {
+      const t = await apiFetch("/api/generate-visit-token", {
+        method: "POST",
+        body: JSON.stringify({ stall }),
+      });
+
+      const v = await apiFetch("/api/verify", {
+        method: "POST",
+        body: JSON.stringify({ stall, exp: t.exp, token: t.token }),
+      });
+
+      if (v.ok) {
+        showToast(`Stall ${stall} recorded`);
+        markVisited(stallName);
+        await loadUserVisitsAndLeaderboard();
+      }
+    } catch (e) {
+      alert("Verification failed.");
     }
-  }catch(e){
-    console.error('verify failed', e);
-    alert(e && e.error ? e.error : (e.message||String(e)));
+    return;
   }
 }
 
-/* ---------- UI helpers ---------- */
-function clearVisitedStalls(){
-  document.querySelectorAll('.neon-stall').forEach(c=>{
-    c.classList.remove('visited');
-    c.innerHTML = `<div style="font-size:0.95rem">${c.dataset.stallId}</div><div style="font-size:0.78rem;opacity:0.9">Tap to scan</div>`;
-  });
-}
-function markStallVisited(stallName){
-  document.querySelectorAll('.neon-stall').forEach(card=>{
-    if(card.dataset.stallId === stallName || card.dataset.stallId.endsWith(String(stallName))){
-      card.classList.add('visited');
-      card.innerHTML = `<div style="font-size:0.95rem">${card.dataset.stallId} ✓</div><div style="font-size:0.78rem;opacity:0.9">Visited</div>`;
+function markVisited(stall) {
+  document.querySelectorAll(".neon-stall").forEach((card) => {
+    if (card.dataset.stallId === stall || card.dataset.stallId.endsWith(stall)) {
+      card.classList.add("visited");
+      card.innerHTML = `<div style="font-size:1rem">${card.dataset.stallId} ✓</div>
+                        <div style="font-size:0.8rem;opacity:0.85">Visited</div>`;
     }
   });
 }
 
-/* ---------- INTERSECTION / ANIMATION BEHAVIOR ---------- */
-const glassZone = document.getElementById('glass-zone');
-const glassBoxes = [verseGlass, idaGlass];
-
-function revealGlassSequence(){
-  glassBoxes.forEach((g, idx)=>{
-    setTimeout(()=> g.classList.add('revealed'), idx * 220);
+function clearVisitedStalls() {
+  document.querySelectorAll(".neon-stall").forEach((card) => {
+    card.classList.remove("visited");
+    card.innerHTML = `<div style="font-size:1rem">${card.dataset.stallId}</div>
+                      <div style="font-size:0.8rem;opacity:0.85">Tap to scan</div>`;
   });
 }
 
-const heroObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(!entry.isIntersecting){
-      heroTitle.style.transition = 'opacity .6s ease, transform .6s ease';
-      heroTitle.style.opacity = '0';
-      heroTitle.style.transform = 'translateY(-10px)';
-    }else{
-      heroTitle.style.opacity = '1';
-      heroTitle.style.transform = 'translateY(0)';
-    }
-  });
-},{ threshold: 0.6 });
-heroObserver.observe(document.getElementById('hero'));
+/* ---------- PRAYER MODAL + SCROLL ---------- */
+openPrayerBtn.addEventListener("click", () => {
+  document.getElementById("prayer-modal").style.display = "flex";
+});
+closePrayerBtn.addEventListener("click", () => {
+  document.getElementById("prayer-modal").style.display = "none";
+});
+scrollToPassport.addEventListener("click", () =>
+  document.getElementById("passport").scrollIntoView({ behavior: "smooth" })
+);
 
-const glassObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      revealGlassSequence();
-    }
-  });
-},{ threshold: 0.22 });
-glassObserver.observe(glassZone);
-
-/* Scroll helpers */
-scrollToPassport?.addEventListener('click', ()=>document.getElementById('passport').scrollIntoView({behavior:'smooth'}));
-document.getElementById('openPrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='flex' });
-document.getElementById('closePrayerBtn')?.addEventListener('click', ()=>{ document.getElementById('prayer-modal').style.display='none' });
-document.getElementById('qr-close')?.addEventListener('click', closeScanner);
-
-/* ---------- Init ---------- */
-(function init(){
+/* ---------- INIT ---------- */
+(function init() {
   buildGrid(DEFAULT_STALL_COUNT);
   updateUIForAuth();
-  // if logged in, load visits + leaderboard
-  if(jwtToken && delegateId){
+
+  if (jwtToken && delegateId) {
     loadUserVisitsAndLeaderboard();
-  }else{
+    gridCard.classList.remove("hidden");
+  } else {
     loadLeaderboard();
   }
-
-  // wire refresh
-  refreshLeaderboardBtn?.addEventListener('click', ()=> loadLeaderboard().then(()=>showToast('Leaderboard refreshed')));
-
-  // hook logout fallback
-  logoutBtn?.addEventListener && logoutBtn.addEventListener('click', ()=>{ /* fallback if present */ });
-
-  if(jwtToken && delegateId){
-    gridCard.classList.remove('hidden');
-  }
 })();
-
 </script>
 
 </body>
