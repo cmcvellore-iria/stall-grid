@@ -670,17 +670,17 @@ new IntersectionObserver((entries)=>{
 document.getElementById("scrollToPassport").onclick =
   ()=> document.getElementById("passport").scrollIntoView({behavior:"smooth"});
 
+/* Ida’s Prayer inline expand */
 const togglePrayerBtn = document.getElementById("togglePrayerBtn");
 const idaFull = document.getElementById("idaFull");
 
 togglePrayerBtn.onclick = () => {
   const isOpen = idaFull.classList.toggle("open");
-  togglePrayerBtn.textContent = isOpen
-    ? "Hide Prayer"
-    : "Read Full Prayer";
+  togglePrayerBtn.textContent =
+    isOpen ? "Hide Prayer" : "Read Full Prayer";
 };
 
-/* AUTH BUTTON HOOKS ---------------------------------------------------- */
+/* AUTH BUTTON HOOKS */
 registerBtn.onclick = doRegister;
 loginBtn.onclick = doLogin;
 forgotBtn.onclick = ()=> alert("Ask registration desk to reset password.");
