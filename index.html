@@ -90,6 +90,24 @@
 
   .ida-title{text-align:center;font-family:"Times New Roman",serif;font-size:1.1rem;margin-bottom:6px;color:#021d2a}
   .ida-preview{text-align:center;color:#02202f;font-family:"Times New Roman",serif;font-size:1rem}
+ .ida-full{
+  max-height:0;
+  overflow:hidden;
+  margin-top:14px;
+  font-family:"Times New Roman", serif;
+  font-style:italic;
+  line-height:1.6;
+  color:#021d2a;
+  opacity:0;
+  transition:
+    max-height .9s ease,
+    opacity .5s ease;
+}
+
+.ida-full.open{
+  max-height:1400px; /* safely larger than full prayer */
+  opacity:1;
+}
 
   .hero-actions{margin-top:12px;display:flex;gap:14px;justify-content:center}
   .link-btn{
@@ -208,6 +226,35 @@
       <div class="ida-preview">
         Father, whose life is within me, and whose love is ever about me…
       </div>
+     <div class="ida-full" id="idaFull">
+  Father, whose life is within me,<br>
+  and whose love is ever about me,<br>
+  grant that Thy life may be maintained in my life today and every day,<br>
+  as with gladness of heart, without haste or confusion of thought,<br>
+  I go about my daily tasks,<br>
+  conscious of the ability to meet every rightful demand,<br>
+  seeing the larger meaning of little things,<br>
+  and finding beauty and love everywhere.<br><br>
+
+  In the sense of Thy presence, may I walk through the hours,<br>
+  breathing the atmosphere of love rather than anxious striving,<br>
+  free from fear, resentment, impatience, or worry,<br>
+  living today as Thy child,<br>
+  conscious of Thy guidance and strength in all that I do.<br><br>
+
+  May I be gentle and understanding with others,<br>
+  patient in difficulties,<br>
+  faithful in small things,<br>
+  courageous in great ones,<br>
+  and ever mindful that my life is not my own,<br>
+  but Thine, to be lived in loving service.<br><br>
+
+  And when the day is over,<br>
+  grant that I may look back without regret,<br>
+  knowing that I have tried to live this day<br>
+  in harmony with Thy will.<br>
+  Amen.
+</div>
       <div class="hero-actions">
         <button class="link-btn" id="openPrayerBtn">Read Full Prayer</button>
         <div class="scroll-hint" id="scrollToPassport">Scroll to Start ↓</div>
@@ -623,12 +670,15 @@ new IntersectionObserver((entries)=>{
 document.getElementById("scrollToPassport").onclick =
   ()=> document.getElementById("passport").scrollIntoView({behavior:"smooth"});
 
-document.getElementById("openPrayerBtn").onclick =
-  ()=> document.getElementById("prayer-modal").style.display="flex";
+const togglePrayerBtn = document.getElementById("togglePrayerBtn");
+const idaFull = document.getElementById("idaFull");
 
-document.getElementById("closePrayerBtn").onclick =
-  ()=> document.getElementById("prayer-modal").style.display="none";
-
+togglePrayerBtn.onclick = () => {
+  const isOpen = idaFull.classList.toggle("open");
+  togglePrayerBtn.textContent = isOpen
+    ? "Hide Prayer"
+    : "Read Full Prayer";
+};
 
 /* AUTH BUTTON HOOKS ---------------------------------------------------- */
 registerBtn.onclick = doRegister;
