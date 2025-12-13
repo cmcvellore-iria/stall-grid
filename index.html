@@ -292,7 +292,7 @@
       </div>
 
       <p style="margin-top:12px;font-size:0.9rem;color:#e8faff">
-        Your **official Registration ID** is required so we can verify your eligibility for prizes.
+        Use the same email you used for conference registration.
       </p>
     </div>
     <!-- GRID CARD -->
@@ -435,7 +435,6 @@ async function doRegister(){
     });
 
     jwtToken = data.token;
-    delegateId = data.delegateId;
     currentName = data.name;
 
     localStorage.setItem("jwt", jwtToken);
@@ -465,11 +464,9 @@ async function doLogin(){
     });
 
     jwtToken = data.token;
-    delegateId = data.delegateId;
     currentName = data.name;
 
     localStorage.setItem("jwt", jwtToken);
-    localStorage.setItem("delegateId", delegateId);
     localStorage.setItem("name", currentName);
 
     showToast("Logged in");
@@ -482,7 +479,6 @@ async function doLogin(){
 
 function doLogout(){
   jwtToken = null;
-  delegateId = null;
   currentName = null;
   localStorage.clear();
   updateUI();
@@ -531,7 +527,7 @@ function markVisited(id){
 
 /* LOAD VISITS + LEADERBOARD ------------------------------------------ */
 async function loadVisits(){
-  if(!delegateId) return;
+  if(!jwtToken) return;
   try{
     const data = await apiFetch(`/api/visits`);
     const visited = new Set(data.visits || []);
