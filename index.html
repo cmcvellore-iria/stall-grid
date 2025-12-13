@@ -283,7 +283,6 @@
 
       <input id="name-input" placeholder="Full Name (as per registration)">
       <input id="email-input" placeholder="Email (as per registration)">
-      <input id="regid-input" placeholder="Registration ID (required)">
       <input id="password-input" type="password" placeholder="Create / Enter Password">
 
       <div class="auth-buttons">
@@ -373,7 +372,6 @@ const heroTitle = document.querySelector(".hero-title");
 /* INPUTS */
 const nameInput = document.getElementById("name-input");
 const emailInput = document.getElementById("email-input");
-const regIdInput = document.getElementById("regid-input");
 const passInput = document.getElementById("password-input");
 
 const registerBtn = document.getElementById("registerBtn");
@@ -389,7 +387,6 @@ const qrReaderEl = document.getElementById("qr-reader");
 
 /* STATE --------------------------------------------------------------- */
 let jwtToken = localStorage.getItem("jwt") || null;
-let delegateId = localStorage.getItem("delegateId") || null;
 let currentName = localStorage.getItem("name") || null;
 
 
@@ -423,16 +420,15 @@ async function apiFetch(path, opts = {}){
 async function doRegister(){
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
-  const regId = regIdInput.value.trim();
   const pass = passInput.value.trim();
 
-  if(!name || !email || !regId || !pass){
-    alert("All fields — Name, Email, Reg-ID, Password — are required.");
+  if(!name || !email || !pass){
+    alert("All fields — Name, Email, and Password — are required.");
     return;
   }
 
   try{
-    const payload = { name, email, regId, password: pass };
+    const payload = { name, email, password: pass };
     const data = await apiFetch("/api/signup", {
       method:"POST",
       body:JSON.stringify(payload)
@@ -443,7 +439,6 @@ async function doRegister(){
     currentName = data.name;
 
     localStorage.setItem("jwt", jwtToken);
-    localStorage.setItem("delegateId", delegateId);
     localStorage.setItem("name", currentName);
 
     showToast("Registered & signed in");
@@ -497,12 +492,12 @@ function doLogout(){
 
 /* UI STATE ------------------------------------------------------------ */
 function updateUI(){
-  if(jwtToken && delegateId){
+  if(jwtToken){
     authCard.classList.add("hidden");
     gridCard.classList.remove("hidden");
     userBanner.classList.remove("hidden");
     userBanner.textContent =
-      `Welcome, ${currentName} (Reg-ID: ${delegateId})`;
+      `Welcome, ${currentName}`;
   } else {
     authCard.classList.remove("hidden");
     gridCard.classList.add("hidden");
@@ -538,7 +533,7 @@ function markVisited(id){
 async function loadVisits(){
   if(!delegateId) return;
   try{
-    const data = await apiFetch(`/api/visits/${delegateId}`);
+    const data = await apiFetch(`/api/visits`);
     const visited = new Set(data.visits || []);
     visited.forEach(id => markVisited(id));
   }catch(e){
@@ -701,7 +696,7 @@ refreshLeaderboardBtn.onclick =
 /* INIT ----------------------------------------------------------------- */
 buildGrid(DEFAULT_STALL_COUNT);
 updateUI();
-if(jwtToken && delegateId) loadEverything();
+if(jwtToken) loadEverything();
 else loadLeaderboard();
 
 </script>
