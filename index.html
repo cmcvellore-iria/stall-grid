@@ -25,13 +25,6 @@
     z-index:-3;
   }
 
-  /* 10% white mist — NOT dimming the image */
-  .hero-mist{
-    position:fixed; inset:0;
-    background:rgba(255,255,255,0.10);
-    z-index:-2;
-  }
-
   .top-bar{
     position:fixed; top:0; left:0; right:0;
     height:110px; padding:15px 22px;
@@ -51,16 +44,18 @@
     transition:opacity .5s ease, transform .5s ease;
   }
   .hero-title .main{
-    font-size:1.6rem; font-weight:700;
-    color:#e8f8ff;
-    text-shadow:0 2px 6px rgba(0,0,0,0.3);
-  }
-  .hero-title .sub{
-    margin-top:6px;
-    font-size:1rem;
-    opacity:0.92;
-    color:#e8f8ff;
-  }
+  font-size:1.6rem;
+  font-weight:700;
+  color:#000;
+  text-shadow:none;
+}
+
+.hero-title .sub{
+  margin-top:6px;
+  font-size:1rem;
+  color:#000;
+  opacity:0.95;
+}
 
   /* HERO CONTAINER */
   .hero-wrap{
@@ -185,14 +180,13 @@
 <body>
 
 <div class="hero-bg"></div>
-<div class="hero-mist"></div>
 
 <!-- FIXED LOGOS + TITLE -->
 <div class="top-bar">
   <div class="logo"><img src="assets/iria2025.png"></div>
   <div class="hero-title">
-    <div class="main">Welcome to the Stall Grid Contest</div>
-    <div class="sub">Explore every stall • Scan QR • Win exciting prizes</div>
+    <div class="main">Welcome to the Stall Grid Contest at CMC Vellore</div>
+    <div class="sub">Explore every stall • Scan QR codes • Complete the stall grid &amp; win exciting prizes</div>
   </div>
   <div class="logo"><img src="assets/cmc.png"></div>
 </div>
