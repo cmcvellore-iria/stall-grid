@@ -1,292 +1,649 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>CMC Vellore – Stall Grid Contest</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CMC Stall Grid Passport – IRIA 2025</title>
 
-  <!-- ================== BASIC THEME ================== -->
-  <style>
-    :root{
-      --cmc-blue:#0b3c6d;
-      --cmc-gold:#c9a24d;
-      --soft-white:#f7f9fc;
-      --glass:rgba(255,255,255,0.12);
-    }
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
-      background:linear-gradient(180deg,#0b3c6d 0%,#082a4e 100%);
-      color:#fff;
-      overflow-x:hidden;
-    }
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:#020617;
+    color:#f8fafc;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
 
-    h1,h2,h3{
-      font-weight:600;
-      letter-spacing:0.3px;
-    }
+  /* HERO */
+  .hero-bg{
+    position:fixed; inset:0;
+    background:url("assets/chapel-hero.jpg") center center/cover no-repeat;
+    z-index:-3;
+  }
 
-    section{
-      padding:80px 20px;
-      max-width:1200px;
-      margin:auto;
-    }
+  /* 10% white mist — NOT dimming the image */
+  .hero-mist{
+    position:fixed; inset:0;
+    background:rgba(255,255,255,0.10);
+    z-index:-2;
+  }
 
-    .center{text-align:center}
+  .top-bar{
+    position:fixed; top:0; left:0; right:0;
+    height:110px; padding:15px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+    z-index:50;
+    pointer-events:none;
+  }
+  .top-bar .logo{pointer-events:auto}
+  .logo img{height:70px}
 
-    /* ================== HERO ================== */
-    .hero{
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      background:
-        radial-gradient(circle at top,rgba(255,255,255,0.08),transparent 60%);
-    }
+  /* HERO CENTER TITLE */
+  .hero-title{
+    position:fixed;
+    top:80px; left:50%; transform:translateX(-50%);
+    text-align:center;
+    z-index:40;
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .hero-title .main{
+    font-size:1.6rem; font-weight:700;
+    color:#e8f8ff;
+    text-shadow:0 2px 6px rgba(0,0,0,0.3);
+  }
+  .hero-title .sub{
+    margin-top:6px;
+    font-size:1rem;
+    opacity:0.92;
+    color:#e8f8ff;
+  }
 
-    .hero img{
-      width:120px;
-      margin-bottom:25px;
-    }
+  /* HERO CONTAINER */
+  .hero-wrap{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+  }
 
-    .hero h1{
-      font-size:clamp(28px,5vw,48px);
-      margin:0;
-    }
+  /* GLASS ZONE */
+  .glass-zone{
+    margin-top:60vh;
+    padding-bottom:70px;
+    display:flex; flex-direction:column; gap:20px; align-items:center;
+  }
 
-    .hero p{
-      max-width:700px;
-      opacity:0.9;
-      font-size:18px;
-      margin-top:20px;
-    }
+  .glass{
+    width:min(900px,92%);
+    background:rgba(255,255,255,0.20);
+    border-radius:18px;
+    padding:28px;
+    backdrop-filter:blur(13px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.35);
+    opacity:0; transform:translateY(28px);
+    transition:opacity .8s ease, transform .8s ease;
+  }
+  .glass.revealed{opacity:1; transform:translateY(0)}
 
-    .scroll-hint{
-      margin-top:60px;
-      opacity:0.6;
-      font-size:14px;
-    }
+  .verse{text-align:center;font-style:italic;font-size:1.05rem;color:#021d2a}
+  .verse-ref{display:block;margin-top:8px;font-size:0.9rem;opacity:0.8}
 
-    /* ================== GLASS CARD ================== */
-    .glass{
-      background:var(--glass);
-      backdrop-filter:blur(14px);
-      border:1px solid rgba(255,255,255,0.18);
-      border-radius:18px;
-      padding:40px;
-      box-shadow:0 30px 60px rgba(0,0,0,0.25);
-    }
+  .ida-title{text-align:center;font-family:"Times New Roman",serif;font-size:1.1rem;margin-bottom:6px;color:#021d2a}
+  .ida-preview{text-align:center;color:#02202f;font-family:"Times New Roman",serif;font-size:1rem}
 
-    /* ================== PRAYER ================== */
-    .prayer{
-      font-style:italic;
-      font-size:20px;
-      line-height:1.7;
-      color:#e8eef7;
-    }
+  .hero-actions{margin-top:12px;display:flex;gap:14px;justify-content:center}
+  .link-btn{
+    padding:10px 18px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.6);
+    background:rgba(255,255,255,0.15);
+    color:#002131;
+    font-weight:600;
+    cursor:pointer;
+    backdrop-filter:blur(6px);
+  }
+  .scroll-hint{cursor:pointer;font-size:0.95rem;opacity:0.8;color:#002131}
 
-    .prayer small{
-      display:block;
-      margin-top:20px;
-      opacity:0.8;
-      font-style:normal;
-    }
+  /* AUTH + GRID */
+  .passport{padding:50px 20px;margin-top:50px}
+  .content-wrap{max-width:1050px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 
-    /* ================== AUTH ================== */
-    .auth-box{
-      max-width:420px;
-      margin:40px auto 0;
-    }
+  .auth-card,.grid-card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(12px);
+    padding:20px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.25);
+  }
 
-    input{
-      width:100%;
-      padding:14px;
-      margin-top:12px;
-      border-radius:10px;
-      border:none;
-      outline:none;
-      font-size:16px;
-    }
+  .pill{
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:999px;
+    background:rgba(9,14,21,0.45);
+    letter-spacing:0.12em;
+    font-size:12px;
+  }
 
-    button{
-      width:100%;
-      margin-top:18px;
-      padding:14px;
-      border-radius:12px;
-      border:none;
-      background:linear-gradient(135deg,var(--cmc-gold),#e6c06b);
-      font-weight:600;
-      cursor:pointer;
-    }
+  input{
+    width:100%; padding:12px;
+    border-radius:12px;
+    margin-top:10px;
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.25);
+    backdrop-filter:blur(8px);
+    color:#002131;
+    font-size:0.95rem;
+  }
 
-    button:hover{opacity:0.9}
+  .auth-buttons{display:flex;gap:12px;margin-top:14px}
+  .btn-register{
+    background:#b9f5df; color:#003826;
+    padding:10px 16px; border-radius:999px; border:none; cursor:pointer;
+  }
+  .btn-login{
+    background:#b3dffe; color:#002846;
+    padding:10px 16px; border-radius:999px; border:none; cursor:pointer;
+  }
+  .btn-ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.4);
+    padding:9px 14px; border-radius:999px; cursor:pointer;
+    color:#e8f8ff;
+  }
 
-    /* ================== STALL GRID ================== */
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-      gap:18px;
-      margin-top:40px;
-    }
+  #grid-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px}
+  .neon-stall{
+    padding:16px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.18);
+    border:1px solid rgba(34,211,238,0.6);
+    color:#d8fcff; text-align:center; cursor:pointer;
+    font-weight:700;
+    backdrop-filter:blur(8px);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .neon-stall:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,0.4)}
+  .neon-stall.visited{
+    background:rgba(0,60,32,0.3);
+    border-color:#4ade80;
+    color:#e9ffe9;
+  }
 
-    .stall{
-      background:rgba(255,255,255,0.15);
-      border-radius:14px;
-      padding:20px 10px;
-      text-align:center;
-      cursor:pointer;
-      transition:0.3s;
-    }
-
-    .stall:hover{
-      transform:translateY(-4px);
-      background:rgba(255,255,255,0.25);
-    }
-
-    .stall.visited{
-      background:linear-gradient(135deg,#4caf50,#2e7d32);
-    }
-
-    /* ================== FOOTER ================== */
-    footer{
-      padding:40px 20px;
-      text-align:center;
-      opacity:0.7;
-      font-size:14px;
-    }
-
-    @media(max-width:600px){
-      section{padding:60px 16px}
-      .glass{padding:28px}
-    }
-  </style>
+  #toast{
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+    background:#002b44;color:#e8faff;
+    padding:12px 20px;border-radius:999px;
+    opacity:0;transition:opacity .25s;
+  }
+  #toast.show{opacity:1}
+</style>
 </head>
+
 <body>
 
-<!-- ================== HERO ================== -->
-<div class="hero">
-  <img src="assets/cmc.png" alt="CMC Logo">
-  <h1>Welcome to the Stall Grid Contest at CMC Vellore</h1>
-  <p>
-    Explore every exhibitor, scan QR codes at each stall, and complete your
-    digital passport to win exciting prizes.
-  </p>
-  <div class="scroll-hint">Scroll to begin ↓</div>
+<div class="hero-bg"></div>
+<div class="hero-mist"></div>
+
+<!-- FIXED LOGOS + TITLE -->
+<div class="top-bar">
+  <div class="logo"><img src="assets/iria2025.png"></div>
+  <div class="hero-title">
+    <div class="main">Welcome to the Stall Grid Contest</div>
+    <div class="sub">Explore every stall • Scan QR • Win exciting prizes</div>
+  </div>
+  <div class="logo"><img src="assets/cmc.png"></div>
 </div>
 
-<!-- ================== PRAYER ================== -->
-<section>
-  <div class="glass center">
-    <div class="prayer">
-      “…not to be ministered unto, but to minister.”
-      <small>— Matthew 20:28</small>
-      <br><br>
-      Inspired by Ida S. Scudder’s faith and vision, CMC continues a legacy
-      of compassionate service through excellence in healthcare and education.
+<main class="hero-wrap" id="hero"></main>
+
+<section class="glass-zone" id="glass-zone">
+  <div class="glass" id="verseGlass">
+    <div class="verse">“Even as the Son of man came not to be ministered unto, but to minister…” <span class="verse-ref">Matthew 20:28</span></div>
+  </div>
+
+  <div class="glass" id="idaGlass">
+    <div class="ida-title">Aunt Ida’s Prayer</div>
+    <div class="ida-preview">Father, whose life is within me, and whose love is ever about me…</div>
+    <div class="hero-actions">
+      <button class="link-btn" id="openPrayerBtn">Read Full Prayer</button>
+      <div class="scroll-hint" id="scrollToPassport">Scroll to Start ↓</div>
     </div>
   </div>
 </section>
 
-<!-- ================== AUTH ================== -->
-<section>
-  <div class="glass auth-box">
-    <h2 class="center">Participant Login</h2>
-    <input id="name" placeholder="Full Name">
-    <input id="email" placeholder="Email Address">
-    <button onclick="signup()">Enter Contest</button>
-    <p id="authMsg" style="margin-top:15px;text-align:center;opacity:0.8"></p>
+<section id="passport" class="passport">
+  <div class="content-wrap">
+
+    <!-- UPDATED AUTH CARD -->
+    <div class="auth-card" id="auth-card">
+      <div class="pill">DELEGATE LOGIN</div>
+      <h3 style="margin-top:10px;color:#e8faff;font-size:1.1rem;font-weight:700">
+        Access Your Stall Grid Passport
+      </h3>
+
+      <input id="name-input" placeholder="Full Name (as per registration)">
+      <input id="email-input" placeholder="Email (as per registration)">
+      <input id="regid-input" placeholder="Registration ID (required)">
+      <input id="password-input" type="password" placeholder="Create / Enter Password">
+
+      <div class="auth-buttons">
+        <button class="btn-register" id="registerBtn">Create My Passport</button>
+        <button class="btn-login" id="loginBtn">Login</button>
+        <button class="btn-ghost" id="forgotBtn">Forgot?</button>
+      </div>
+
+      <p style="margin-top:12px;font-size:0.9rem;color:#e8faff">
+        Your **official Registration ID** is required so we can verify your eligibility for prizes.
+      </p>
+    </div>
+    <!-- GRID CARD -->
+    <div class="grid-card hidden" id="grid-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="pill">STALL GRID</div>
+          <div style="font-size:1rem;font-weight:600;margin-top:6px;">Scan QR at Each Exhibitor</div>
+          <p style="font-size:0.9rem;opacity:0.9;margin-top:6px;">
+            Tap a stall tile to open the camera. Your visit is recorded instantly.
+          </p>
+        </div>
+        <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
+      </div>
+
+      <div id="user-banner" class="hidden"
+           style="margin-top:12px;font-weight:700;font-size:1rem;color:#e8faff"></div>
+
+      <div id="grid" class="grid-container" style="margin-top:14px"></div>
+
+      <div id="leaderboard" style="margin-top:22px">
+        <div class="pill">LEADERBOARD</div>
+        <div style="font-size:0.95rem;font-weight:600;margin-top:6px;">
+          Most Active Stall Explorers
+        </div>
+        <div id="leader-list" style="margin-top:10px"></div>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- ================== STALL GRID ================== -->
-<section id="contest" style="display:none">
-  <div class="glass">
-    <h2 class="center">Stall Grid</h2>
-    <p class="center" style="opacity:0.85">
-      Visit each stall and scan the QR code to collect your stamps.
-    </p>
 
-    <div class="grid" id="grid"></div>
+<!-- QR OVERLAY -->
+<div id="qr-overlay"
+     style="position:fixed;inset:0;background:rgba(2,8,16,0.92);display:none;align-items:center;justify-content:center;z-index:200">
+  <div id="qr-reader" style="width:360px;max-width:92%;border-radius:14px;overflow:hidden"></div>
+  <button class="btn-ghost" id="qr-close" style="margin-top:14px">Close</button>
+</div>
+
+<!-- PRAYER MODAL -->
+<div id="prayer-modal"
+     style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,12,0.65);z-index:250;padding:14px">
+  <div style="background:white;color:#031025;padding:20px;border-radius:14px;max-width:750px;max-height:80vh;overflow:auto">
+    <h3 style="font-family:Times New Roman,serif;font-style:italic">Aunt Ida’s Prayer</h3>
+    <div style="font-family:Times New Roman,serif;font-style:italic;line-height:1.5;margin-top:10px">
+      Father, whose life is within me, and whose love is ever about me...
+      <p style="margin-top:12px">...(full prayer here)...</p>
+    </div>
+    <div style="text-align:right;margin-top:10px">
+      <button class="link-btn" id="closePrayerBtn">Close</button>
+    </div>
   </div>
-</section>
+</div>
 
-<footer>
-  © CMC Vellore · IRIA Conference
-</footer>
+<div id="toast"></div>
 
-<!-- ================== SCRIPT ================== -->
-<script>
-  const API_BASE = "https://cmc-iria-secure.onrender.com";
-  const TOTAL_STALLS = 12;
 
-  const token = localStorage.getItem("token");
+<!-- =================================================================== -->
+<!-- ======================   JAVASCRIPT START   ======================== -->
+<!-- =================================================================== -->
+<script type="module">
 
-  if(token){
-    document.getElementById("contest").style.display="block";
-    loadPassport();
+/* CONFIG --------------------------------------------------------------- */
+const API_BASE = "https://cmc-iria-secure.onrender.com";
+const DEFAULT_STALL_COUNT = 35;
+
+/* ELEMENTS ------------------------------------------------------------- */
+const authCard = document.getElementById("auth-card");
+const gridCard = document.getElementById("grid-card");
+const gridEl = document.getElementById("grid");
+const leaderEl = document.getElementById("leader-list");
+const toastEl = document.getElementById("toast");
+const userBanner = document.getElementById("user-banner");
+const heroTitle = document.querySelector(".hero-title");
+
+/* INPUTS */
+const nameInput = document.getElementById("name-input");
+const emailInput = document.getElementById("email-input");
+const regIdInput = document.getElementById("regid-input");
+const passInput = document.getElementById("password-input");
+
+const registerBtn = document.getElementById("registerBtn");
+const loginBtn = document.getElementById("loginBtn");
+const forgotBtn = document.getElementById("forgotBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const refreshLeaderboardBtn = document.getElementById("refreshLeaderboardBtn");
+
+/* QR */
+const qrOverlay = document.getElementById("qr-overlay");
+const qrReaderEl = document.getElementById("qr-reader");
+
+
+/* STATE --------------------------------------------------------------- */
+let jwtToken = localStorage.getItem("jwt") || null;
+let delegateId = localStorage.getItem("delegateId") || null;
+let currentName = localStorage.getItem("name") || null;
+
+
+/* TOAST --------------------------------------------------------------- */
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  setTimeout(()=>toastEl.classList.remove("show"), 2200);
+}
+
+
+/* API WRAPPER --------------------------------------------------------- */
+async function apiFetch(path, opts = {}){
+  const headers = opts.headers || {};
+  headers["Content-Type"] = "application/json";
+  if(jwtToken) headers["Authorization"] = "Bearer " + jwtToken;
+  opts.headers = headers;
+
+  const res = await fetch(API_BASE + path, opts);
+  const text = await res.text();
+  let data;
+  try { data = text ? JSON.parse(text) : null; }
+  catch { data = text; }
+
+  if(!res.ok) throw (data || {error:"Request failed"});
+  return data;
+}
+
+
+/* AUTH ---------------------------------------------------------------- */
+async function doRegister(){
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const regId = regIdInput.value.trim();
+  const pass = passInput.value.trim();
+
+  if(!name || !email || !regId || !pass){
+    alert("All fields — Name, Email, Reg-ID, Password — are required.");
+    return;
   }
 
-  function signup(){
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    if(!name || !email){
-      document.getElementById("authMsg").innerText="Please fill all fields";
-      return;
+  try{
+    const payload = { name, email, regId, password: pass };
+    const data = await apiFetch("/api/signup", {
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    currentName = data.name;
+
+    localStorage.setItem("jwt", jwtToken);
+    localStorage.setItem("delegateId", delegateId);
+    localStorage.setItem("name", currentName);
+
+    showToast("Registered & signed in");
+    updateUI();
+    await loadEverything();
+  }catch(e){
+    alert(e.error || e.message || "Registration error");
+  }
+}
+
+async function doLogin(){
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
+
+  if(!email || !pass){
+    alert("Enter email & password.");
+    return;
+  }
+
+  try{
+    const data = await apiFetch("/api/login", {
+      method:"POST",
+      body:JSON.stringify({ email, password:pass })
+    });
+
+    jwtToken = data.token;
+    delegateId = data.delegateId;
+    currentName = data.name;
+
+    localStorage.setItem("jwt", jwtToken);
+    localStorage.setItem("delegateId", delegateId);
+    localStorage.setItem("name", currentName);
+
+    showToast("Logged in");
+    updateUI();
+    await loadEverything();
+  }catch(e){
+    alert(e.error || e.message || "Login error");
+  }
+}
+
+function doLogout(){
+  jwtToken = null;
+  delegateId = null;
+  currentName = null;
+  localStorage.clear();
+  updateUI();
+  showToast("Logged out");
+}
+
+
+/* UI STATE ------------------------------------------------------------ */
+function updateUI(){
+  if(jwtToken && delegateId){
+    authCard.classList.add("hidden");
+    gridCard.classList.remove("hidden");
+    userBanner.classList.remove("hidden");
+    userBanner.textContent =
+      `Welcome, ${currentName} (Reg-ID: ${delegateId})`;
+  } else {
+    authCard.classList.remove("hidden");
+    gridCard.classList.add("hidden");
+    userBanner.classList.add("hidden");
+  }
+}
+
+
+/* STALL GRID ---------------------------------------------------------- */
+function buildGrid(n = DEFAULT_STALL_COUNT){
+  gridEl.innerHTML = "";
+  for(let i=1;i<=n;i++){
+    const stall = document.createElement("div");
+    stall.className = "neon-stall";
+    stall.dataset.id = i;
+    stall.innerHTML = `Stall ${i}`;
+    stall.onclick = ()=>openScanner(i);
+    gridEl.appendChild(stall);
+  }
+}
+
+function markVisited(id){
+  document.querySelectorAll(".neon-stall").forEach(el=>{
+    if(Number(el.dataset.id) === Number(id)){
+      el.classList.add("visited");
+      el.textContent = `Stall ${id} ✓`;
     }
+  });
+}
 
-    fetch(API_BASE+"/api/signup",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({name,email})
-    })
-    .then(r=>r.json())
-    .then(d=>{
-      if(d.token){
-        localStorage.setItem("token",d.token);
-        document.getElementById("contest").style.display="block";
-        loadPassport();
-      }else{
-        document.getElementById("authMsg").innerText="Login failed";
-      }
-    })
-    .catch(()=>{
-      document.getElementById("authMsg").innerText="Server error";
+
+/* LOAD VISITS + LEADERBOARD ------------------------------------------ */
+async function loadVisits(){
+  if(!delegateId) return;
+  try{
+    const data = await apiFetch(`/api/visits/${delegateId}`);
+    const visited = new Set(data.visits || []);
+    visited.forEach(id => markVisited(id));
+  }catch(e){
+    console.warn(e);
+  }
+}
+
+async function loadLeaderboard(){
+  leaderEl.innerHTML = "Loading…";
+  try{
+    const data = await apiFetch("/api/leaderboard");
+    leaderEl.innerHTML = "";
+    (data.top || []).forEach((p,i)=>{
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.padding = "6px 4px";
+      row.innerHTML =
+        `<div>${i+1}. ${p.name}</div><div>${p.count} stalls</div>`;
+      leaderEl.appendChild(row);
     });
+  }catch(e){
+    leaderEl.textContent = "Error loading leaderboard";
+  }
+}
+
+async function loadEverything(){
+  await loadVisits();
+  await loadLeaderboard();
+}
+
+
+/* QR SCANNING --------------------------------------------------------- */
+let qrScanner = null;
+
+async function openScanner(stall){
+  if(!jwtToken){ alert("Please login first."); return; }
+
+  qrOverlay.style.display = "flex";
+
+  if(!qrScanner){
+    qrScanner = new Html5Qrcode("qr-reader");
+  } else {
+    try { await qrScanner.stop(); } catch {}
   }
 
-  function loadPassport(){
-    const grid = document.getElementById("grid");
-    grid.innerHTML="";
+  await qrScanner.start(
+    { facingMode:"environment" },
+    { fps:10, qrbox:250 },
+    async (decoded)=>{
+      try{ await qrScanner.stop(); }catch{}
+      qrOverlay.style.display = "none";
+      handleQR(decoded, stall);
+    }
+  );
+}
 
-    fetch(API_BASE+"/api/passport",{
-      headers:{Authorization:"Bearer "+localStorage.getItem("token")}
-    })
-    .then(r=>r.json())
-    .then(data=>{
-      for(let i=1;i<=TOTAL_STALLS;i++){
-        const div=document.createElement("div");
-        div.className="stall"+(data.visited?.includes(i)?" visited":"");
-        div.innerText="Stall "+i;
-        div.onclick=()=>scan(i);
-        grid.appendChild(div);
-      }
-    });
-  }
+async function handleQR(decoded, stallClicked){
+  let urlParams = {};
+  try { urlParams = Object.fromEntries(new URL(decoded).searchParams.entries()); }
+  catch {}
 
-  function scan(id){
-    fetch(API_BASE+"/api/scan",{
+  const stall = urlParams.stall || stallClicked;
+
+  // Hybrid flow (static QR)
+  try{
+    const tokenResp = await apiFetch("/api/generate-visit-token", {
       method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        Authorization:"Bearer "+localStorage.getItem("token")
-      },
-      body:JSON.stringify({stallId:id})
-    })
-    .then(()=>loadPassport());
+      body:JSON.stringify({ stall })
+    });
+
+    const verify = await apiFetch("/api/verify", {
+      method:"POST",
+      body:JSON.stringify({
+        stall,
+        token: tokenResp.token,
+        exp: tokenResp.exp
+      })
+    });
+
+    if(verify.ok){
+      showToast(`Recorded visit: Stall ${stall}`);
+      markVisited(stall);
+      await loadLeaderboard();
+    } else {
+      alert(verify.error || "Verification failed");
+    }
+  }catch(e){
+    alert(e.error || "QR verification error");
   }
+}
+
+document.getElementById("qr-close").onclick = async ()=>{
+  qrOverlay.style.display = "none";
+  if(qrScanner){
+    try{ await qrScanner.stop(); }catch{}
+  }
+};
+
+
+/* HERO TITLE FADE ON SCROLL ------------------------------------------- */
+window.addEventListener("scroll", ()=>{
+  const fadeStart = 50;
+  const fadeEnd = 260;
+
+  const y = window.scrollY;
+  if(y < fadeStart){
+    heroTitle.style.opacity = "1";
+    heroTitle.style.transform = "translateX(-50%) translateY(0)";
+  } else if(y > fadeEnd){
+    heroTitle.style.opacity = "0";
+    heroTitle.style.transform = "translateX(-50%) translateY(-20px)";
+  } else {
+    const t = 1 - (y - fadeStart) / (fadeEnd - fadeStart);
+    heroTitle.style.opacity = t;
+    heroTitle.style.transform = `translateX(-50%) translateY(${-(20*(1-t))}px)`;
+  }
+});
+
+
+/* GLASS FADE-IN -------------------------------------------------------- */
+const verseGlass = document.getElementById("verseGlass");
+const idaGlass = document.getElementById("idaGlass");
+
+function revealGlass(){
+  verseGlass.classList.add("revealed");
+  setTimeout(()=> idaGlass.classList.add("revealed"), 200);
+}
+
+const glassZone = document.getElementById("glass-zone");
+new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) revealGlass(); });
+},{threshold:0.3}).observe(glassZone);
+
+
+/* MISC UI --------------------------------------------------------------- */
+document.getElementById("scrollToPassport").onclick =
+  ()=> document.getElementById("passport").scrollIntoView({behavior:"smooth"});
+
+document.getElementById("openPrayerBtn").onclick =
+  ()=> document.getElementById("prayer-modal").style.display="flex";
+
+document.getElementById("closePrayerBtn").onclick =
+  ()=> document.getElementById("prayer-modal").style.display="none";
+
+
+/* AUTH BUTTON HOOKS ---------------------------------------------------- */
+registerBtn.onclick = doRegister;
+loginBtn.onclick = doLogin;
+forgotBtn.onclick = ()=> alert("Ask registration desk to reset password.");
+if(logoutBtn) logoutBtn.onclick = doLogout;
+
+refreshLeaderboardBtn.onclick =
+  ()=> loadLeaderboard().then(()=>showToast("Leaderboard refreshed"));
+
+
+/* INIT ----------------------------------------------------------------- */
+buildGrid(DEFAULT_STALL_COUNT);
+updateUI();
+if(jwtToken && delegateId) loadEverything();
+else loadLeaderboard();
+
 </script>
 
 </body>
