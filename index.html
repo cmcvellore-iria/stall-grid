@@ -1,424 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CMC Stall Grid Contest – IRIA 2025</title>
+  <meta charset="UTF-8" />
+  <title>CMC Vellore – Stall Grid Contest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <!-- ================== BASIC THEME ================== -->
+  <style>
+    :root{
+      --cmc-blue:#0b3c6d;
+      --cmc-gold:#c9a24d;
+      --soft-white:#f7f9fc;
+      --glass:rgba(255,255,255,0.12);
+    }
 
-<style>
-/* ================= RESET ================= */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:#fff;
-  color:#0b2338;
-  overflow-x:hidden;
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+      background:linear-gradient(180deg,#0b3c6d 0%,#082a4e 100%);
+      color:#fff;
+      overflow-x:hidden;
+    }
 
-/* ================= HERO ================= */
-.hero-bg{
-  position:fixed; inset:0;
-  background:url("assets/chapel-hero.jpg") center/cover no-repeat;
-  z-index:-3;
-}
-.hero-wrap{height:100vh}
+    h1,h2,h3{
+      font-weight:600;
+      letter-spacing:0.3px;
+    }
 
-/* ================= TOP BAR ================= */
-.top-bar{
-  position:fixed; top:0; left:0; right:0;
-  height:110px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 24px;
-  z-index:50;
-}
-.logo img{height:72px}
+    section{
+      padding:80px 20px;
+      max-width:1200px;
+      margin:auto;
+    }
 
-/* ================= HERO TITLE ================= */
-.hero-title{
-  position:fixed;
-  top:76px;
-  left:50%;
-  transform:translateX(-50%);
-  text-align:center;
-  transition:opacity .5s ease, transform .5s ease;
-  z-index:40;
-  pointer-events:none;
-}
-.hero-title .main{
-  font-size:1.6rem;
-  font-weight:700;
-  color:#000;
-}
-.hero-title .sub{
-  font-size:1rem;
-  margin-top:6px;
-  color:#000;
-}
+    .center{text-align:center}
 
-/* ================= GLASS ZONE ================= */
-.glass-zone{
-  padding-top:65vh;
-  padding-bottom:60px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:26px;
-}
-.glass{
-  width:min(1100px,94%);
-  background:rgba(255,255,255,.42);
-  backdrop-filter:blur(14px) saturate(160%);
-  border-radius:18px;
-  padding:28px 32px;
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:0 12px 40px rgba(0,0,0,.18);
-  opacity:0;
-  transform:translateY(30px);
-  transition:.8s cubic-bezier(.2,.9,.2,1);
-}
-.glass.revealed{opacity:1;transform:translateY(0)}
+    /* ================== HERO ================== */
+    .hero{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      background:
+        radial-gradient(circle at top,rgba(255,255,255,0.08),transparent 60%);
+    }
 
-.verse{
-  font-family:"Times New Roman",serif;
-  text-align:center;
-  font-size:1.15rem;
-  line-height:1.55;
-}
-.verse-ref{
-  display:block;
-  margin-top:10px;
-  font-size:.95rem;
-  opacity:.85;
-}
+    .hero img{
+      width:120px;
+      margin-bottom:25px;
+    }
 
-/* ================= AUNT IDA ================= */
-.ida-title{
-  font-family:"Times New Roman",serif;
-  text-align:center;
-  font-size:1.25rem;
-  font-weight:700;
-  margin-bottom:10px;
-}
-.ida-preview{
-  font-family:"Times New Roman",serif;
-  text-align:center;
-  font-size:1.05rem;
-}
-#ida-full{
-  display:none;
-  white-space:pre-line;
-  margin-top:16px;
-  font-family:"Times New Roman",serif;
-  line-height:1.55;
-}
-.toggle-btn{
-  margin:16px auto 0;
-  display:block;
-  padding:10px 18px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.25);
-  background:rgba(255,255,255,.55);
-  cursor:pointer;
-  font-weight:600;
-}
+    .hero h1{
+      font-size:clamp(28px,5vw,48px);
+      margin:0;
+    }
 
-/* ================= PASSPORT ================= */
-.passport{padding:60px 18px 90px}
-.content-wrap{
-  max-width:1050px;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-.auth-card,.grid-card{
-  background:rgba(255,255,255,.45);
-  backdrop-filter:blur(14px) saturate(160%);
-  border-radius:18px;
-  padding:22px;
-  border:1px solid rgba(255,255,255,.45);
-  box-shadow:0 10px 36px rgba(0,0,0,.22);
-}
+    .hero p{
+      max-width:700px;
+      opacity:0.9;
+      font-size:18px;
+      margin-top:20px;
+    }
 
-.pill{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:12px;
-  letter-spacing:.12em;
-  background:rgba(255,255,255,.7);
-}
+    .scroll-hint{
+      margin-top:60px;
+      opacity:0.6;
+      font-size:14px;
+    }
 
-input{
-  width:100%;
-  margin-top:12px;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.18);
-  background:rgba(255,255,255,.6);
-}
+    /* ================== GLASS CARD ================== */
+    .glass{
+      background:var(--glass);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:18px;
+      padding:40px;
+      box-shadow:0 30px 60px rgba(0,0,0,0.25);
+    }
 
-.auth-buttons{display:flex;gap:12px;margin-top:16px}
-.btn-register{
-  background:#9ad3bc;color:#043024;
-  border:none;border-radius:14px;
-  padding:10px;font-weight:700;cursor:pointer;flex:1;
-}
-.btn-login{
-  background:#8bbcea;color:#06253b;
-  border:none;border-radius:14px;
-  padding:10px;font-weight:700;cursor:pointer;flex:1;
-}
-.btn-ghost{
-  background:rgba(255,255,255,.45);
-  border:1px solid rgba(0,0,0,.25);
-  border-radius:14px;
-  padding:10px;cursor:pointer;
-}
+    /* ================== PRAYER ================== */
+    .prayer{
+      font-style:italic;
+      font-size:20px;
+      line-height:1.7;
+      color:#e8eef7;
+    }
 
-/* ================= GRID ================= */
-.grid-container{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:16px;
-  margin-top:20px;
-}
-.neon-stall{
-  padding:18px;
-  border-radius:16px;
-  background:rgba(255,255,255,.35);
-  backdrop-filter:blur(12px);
-  text-align:center;
-  font-weight:700;
-  cursor:pointer;
-  transition:.18s;
-}
-.neon-stall:hover{transform:translateY(-6px)}
-.neon-stall.visited{
-  background:rgba(150,255,180,.45);
-  border:1px solid rgba(60,150,90,.9);
-}
+    .prayer small{
+      display:block;
+      margin-top:20px;
+      opacity:0.8;
+      font-style:normal;
+    }
 
-/* ================= LEADERBOARD ================= */
-#leader-list{margin-top:12px;max-height:260px;overflow:auto}
-#leader-list .row{
-  display:flex;justify-content:space-between;
-  padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.08);
-}
+    /* ================== AUTH ================== */
+    .auth-box{
+      max-width:420px;
+      margin:40px auto 0;
+    }
 
-/* ================= QR ================= */
-#qr-overlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.85);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:200;
-}
-#qr-reader{width:360px;max-width:95%;border-radius:18px;overflow:hidden}
+    input{
+      width:100%;
+      padding:14px;
+      margin-top:12px;
+      border-radius:10px;
+      border:none;
+      outline:none;
+      font-size:16px;
+    }
 
-/* ================= TOAST ================= */
-#toast{
-  position:fixed;bottom:28px;left:50%;
-  transform:translateX(-50%);
-  padding:12px 20px;
-  background:#0b2338;color:#fff;
-  border-radius:999px;
-  opacity:0;transition:.25s;
-}
-#toast.show{opacity:1}
+    button{
+      width:100%;
+      margin-top:18px;
+      padding:14px;
+      border-radius:12px;
+      border:none;
+      background:linear-gradient(135deg,var(--cmc-gold),#e6c06b);
+      font-weight:600;
+      cursor:pointer;
+    }
 
-/* ================= UTIL ================= */
-.hidden{display:none}
-</style>
+    button:hover{opacity:0.9}
+
+    /* ================== STALL GRID ================== */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+      gap:18px;
+      margin-top:40px;
+    }
+
+    .stall{
+      background:rgba(255,255,255,0.15);
+      border-radius:14px;
+      padding:20px 10px;
+      text-align:center;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .stall:hover{
+      transform:translateY(-4px);
+      background:rgba(255,255,255,0.25);
+    }
+
+    .stall.visited{
+      background:linear-gradient(135deg,#4caf50,#2e7d32);
+    }
+
+    /* ================== FOOTER ================== */
+    footer{
+      padding:40px 20px;
+      text-align:center;
+      opacity:0.7;
+      font-size:14px;
+    }
+
+    @media(max-width:600px){
+      section{padding:60px 16px}
+      .glass{padding:28px}
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="hero-bg"></div>
-
-<div class="top-bar">
-  <div class="logo"><img src="assets/iria2025.png"></div>
-  <div class="logo"><img src="assets/cmc.png"></div>
+<!-- ================== HERO ================== -->
+<div class="hero">
+  <img src="assets/cmc.png" alt="CMC Logo">
+  <h1>Welcome to the Stall Grid Contest at CMC Vellore</h1>
+  <p>
+    Explore every exhibitor, scan QR codes at each stall, and complete your
+    digital passport to win exciting prizes.
+  </p>
+  <div class="scroll-hint">Scroll to begin ↓</div>
 </div>
 
-<div class="hero-title" id="heroTitle">
-  <div class="main">Welcome to the Stall Grid Contest at CMC Vellore</div>
-  <div class="sub">
-    Explore every exhibitor, scan QR codes, and complete your passport to win exciting prizes
-  </div>
-</div>
-
-<div class="hero-wrap"></div>
-
-<section class="glass-zone" id="glassZone">
-
-  <div class="glass" id="verseGlass">
-    <div class="verse">
-      “Even as the Son of man came not to be ministered unto, but to minister,
-      and to give his life a ransom for many.”
-      <span class="verse-ref">Matthew 20:28</span>
+<!-- ================== PRAYER ================== -->
+<section>
+  <div class="glass center">
+    <div class="prayer">
+      “…not to be ministered unto, but to minister.”
+      <small>— Matthew 20:28</small>
+      <br><br>
+      Inspired by Ida S. Scudder’s faith and vision, CMC continues a legacy
+      of compassionate service through excellence in healthcare and education.
     </div>
   </div>
-
-  <div class="glass" id="idaGlass">
-    <div class="ida-title">Aunt Ida’s Prayer</div>
-    <div class="ida-preview">
-      Father, whose life is within me, and whose love is ever about me…
-    </div>
-
-    <button class="toggle-btn" id="togglePrayer">Read full prayer ↓</button>
-
-    <div id="ida-full">
-Father, whose life is within me,
-and whose love is ever about me,
-Grant that Thy life may be maintained in my life today and every day,
-as with gladness of heart, without haste or confusion of thought,
-I go about my daily tasks,
-conscious of the ability to meet every rightful demand,
-seeing the larger meaning of little things,
-and finding beauty and love everywhere.
-In the sense of Thy presence, may I walk through the hours,
-breathing the atmosphere of love rather than anxious striving...
-    </div>
-  </div>
-
 </section>
 
-<section class="passport" id="passport">
-<div class="content-wrap">
-
-<div class="auth-card" id="authCard">
-  <div class="pill">DELEGATE LOGIN</div>
-  <input id="nameInput" placeholder="Full Name (as per registration)">
-  <input id="emailInput" placeholder="Email (as per registration)">
-  <input id="regIdInput" placeholder="Registration ID">
-  <input id="passInput" type="password" placeholder="Password">
-
-  <div class="auth-buttons">
-    <button class="btn-register" id="registerBtn">Register</button>
-    <button class="btn-login" id="loginBtn">Login</button>
+<!-- ================== AUTH ================== -->
+<section>
+  <div class="glass auth-box">
+    <h2 class="center">Participant Login</h2>
+    <input id="name" placeholder="Full Name">
+    <input id="email" placeholder="Email Address">
+    <button onclick="signup()">Enter Contest</button>
+    <p id="authMsg" style="margin-top:15px;text-align:center;opacity:0.8"></p>
   </div>
-</div>
-
-<div class="grid-card hidden" id="gridCard">
-  <div class="pill">STALL GRID</div>
-  <div id="userBanner" style="margin-top:12px;font-weight:700"></div>
-  <div id="grid" class="grid-container"></div>
-
-  <div id="leaderboard" style="margin-top:24px">
-    <div class="pill">LEADERBOARD</div>
-    <div id="leader-list"></div>
-  </div>
-</div>
-
-</div>
 </section>
 
-<div id="qr-overlay">
-  <div id="qr-reader"></div>
-</div>
+<!-- ================== STALL GRID ================== -->
+<section id="contest" style="display:none">
+  <div class="glass">
+    <h2 class="center">Stall Grid</h2>
+    <p class="center" style="opacity:0.85">
+      Visit each stall and scan the QR code to collect your stamps.
+    </p>
 
-<div id="toast"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
 
-<script type="module">
-const API="https://cmc-iria-secure.onrender.com";
-const STALLS=35;
+<footer>
+  © CMC Vellore · IRIA Conference
+</footer>
 
-const hero=document.getElementById("heroTitle");
-window.addEventListener("scroll",()=>{
-  const y=scrollY;
-  hero.style.opacity=y<200?1-(y/200):0;
-  hero.style.transform=`translateX(-50%) translateY(${-Math.min(y/10,20)}px)`;
-});
+<!-- ================== SCRIPT ================== -->
+<script>
+  const API_BASE = "https://cmc-iria-secure.onrender.com";
+  const TOTAL_STALLS = 12;
 
-const io=new IntersectionObserver(e=>{
-  if(e[0].isIntersecting){
-    document.getElementById("verseGlass").classList.add("revealed");
-    setTimeout(()=>document.getElementById("idaGlass").classList.add("revealed"),200);
-  }
-},{threshold:.3});
-io.observe(document.getElementById("glassZone"));
+  const token = localStorage.getItem("token");
 
-document.getElementById("togglePrayer").onclick=()=>{
-  const p=document.getElementById("ida-full");
-  p.style.display=p.style.display==="block"?"none":"block";
-};
-
-let token=localStorage.getItem("jwt");
-let delegate=localStorage.getItem("delegate");
-const auth=document.getElementById("authCard");
-const gridCard=document.getElementById("gridCard");
-const grid=document.getElementById("grid");
-const banner=document.getElementById("userBanner");
-
-function toast(t){
-  const el=document.getElementById("toast");
-  el.textContent=t;el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"),2200);
-}
-
-function buildGrid(){
-  grid.innerHTML="";
-  for(let i=1;i<=STALLS;i++){
-    const d=document.createElement("div");
-    d.className="neon-stall";
-    d.textContent="Stall "+i;
-    d.onclick=()=>scan(i);
-    grid.appendChild(d);
-  }
-}
-
-async function api(path,body){
-  const r=await fetch(API+path,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      ...(token?{"Authorization":"Bearer "+token}:{})
-    },
-    body:JSON.stringify(body)
-  });
-  return r.json();
-}
-
-document.getElementById("registerBtn").onclick=async()=>{
-  const res=await api("/api/signup",{
-    name:nameInput.value,
-    email:emailInput.value,
-    regId:regIdInput.value,
-    password:passInput.value
-  });
-  token=res.token; delegate=res.delegateId;
-  localStorage.setItem("jwt",token);
-  localStorage.setItem("delegate",delegate);
-  init();
-};
-
-document.getElementById("loginBtn").onclick=async()=>{
-  const res=await api("/api/login",{
-    email:emailInput.value,
-    password:passInput.value
-  });
-  token=res.token; delegate=res.delegateId;
-  localStorage.setItem("jwt",token);
-  localStorage.setItem("delegate",delegate);
-  init();
-};
-
-function init(){
   if(token){
-    auth.classList.add("hidden");
-    gridCard.classList.remove("hidden");
-    banner.textContent="Welcome! Complete all 35 stalls 🎉";
-    buildGrid();
+    document.getElementById("contest").style.display="block";
+    loadPassport();
   }
-}
-init();
+
+  function signup(){
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    if(!name || !email){
+      document.getElementById("authMsg").innerText="Please fill all fields";
+      return;
+    }
+
+    fetch(API_BASE+"/api/signup",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name,email})
+    })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.token){
+        localStorage.setItem("token",d.token);
+        document.getElementById("contest").style.display="block";
+        loadPassport();
+      }else{
+        document.getElementById("authMsg").innerText="Login failed";
+      }
+    })
+    .catch(()=>{
+      document.getElementById("authMsg").innerText="Server error";
+    });
+  }
+
+  function loadPassport(){
+    const grid = document.getElementById("grid");
+    grid.innerHTML="";
+
+    fetch(API_BASE+"/api/passport",{
+      headers:{Authorization:"Bearer "+localStorage.getItem("token")}
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      for(let i=1;i<=TOTAL_STALLS;i++){
+        const div=document.createElement("div");
+        div.className="stall"+(data.visited?.includes(i)?" visited":"");
+        div.innerText="Stall "+i;
+        div.onclick=()=>scan(i);
+        grid.appendChild(div);
+      }
+    });
+  }
+
+  function scan(id){
+    fetch(API_BASE+"/api/scan",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:"Bearer "+localStorage.getItem("token")
+      },
+      body:JSON.stringify({stallId:id})
+    })
+    .then(()=>loadPassport());
+  }
 </script>
 
 </body>
