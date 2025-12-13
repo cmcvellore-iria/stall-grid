@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CMC Stall Grid Contest – IRIA 2025</title>
+
+<!-- QR Scanner -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+/* ================= RESET ================= */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  color:#0b2338;
+  background:#fff;
+  overflow-x:hidden;
+}
+
+/* ================= HERO ================= */
+.hero-bg{
+  position:fixed; inset:0;
+  background:url("assets/chapel-hero.jpg") center/cover no-repeat;
+  z-index:-3;
+}
+
+.top-bar{
+  position:fixed; top:0; left:0; right:0;
+  height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 22px;
+  z-index:50;
+}
+.logo img{height:70px}
+
+.hero-title{
+  position:fixed;
+  top:76px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  transition:opacity .6s ease, transform .6s ease;
+  z-index:40;
+}
+.hero-title .main{
+  font-size:1.6rem;
+  font-weight:700;
+  color:#000;
+}
+.hero-title .sub{
+  margin-top:6px;
+  font-size:1rem;
+  color:#000;
+}
+
+.hero-spacer{height:100vh}
+
+/* ================= GLASS ================= */
+.glass-zone{
+  padding-top:60vh;
+  padding-bottom:60px;
+  display:flex;
+  flex-direction:column;
+  gap:26px;
+  align-items:center;
+}
+.glass{
+  width:min(1100px,94%);
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(14px) saturate(160%);
+  border-radius:18px;
+  padding:28px 32px;
+  border:1px solid rgba(255,255,255,0.45);
+  box-shadow:0 12px 42px rgba(0,0,0,0.25);
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .8s ease, transform .8s ease;
+}
+.glass.revealed{opacity:1; transform:none}
+
+/* Verse */
+.verse{
+  font-family:"Times New Roman",serif;
+  text-align:center;
+  font-size:1.15rem;
+  line-height:1.55;
+}
+.verse-ref{
+  display:block;
+  margin-top:10px;
+  font-size:.95rem;
+  opacity:.85;
+}
+
+/* Aunt Ida */
+.ida-title{
+  font-family:"Times New Roman",serif;
+  font-size:1.25rem;
+  font-weight:700;
+  text-align:center;
+}
+.ida-preview{
+  margin-top:8px;
+  font-family:"Times New Roman",serif;
+  text-align:center;
+}
+#ida-full{
+  display:none;
+  margin-top:16px;
+  font-family:"Times New Roman",serif;
+  line-height:1.55;
+  white-space:pre-line;
+}
+.link-btn{
+  margin:14px auto 0;
+  display:block;
+  padding:10px 18px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(0,0,0,0.2);
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* ================= PASSPORT ================= */
+.passport{
+  padding:60px 18px 90px;
+}
+.content{
+  max-width:1050px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+.card{
+  background:rgba(255,255,255,0.4);
+  backdrop-filter:blur(14px);
+  border-radius:18px;
+  padding:24px;
+  border:1px solid rgba(255,255,255,0.45);
+  box-shadow:0 10px 36px rgba(0,0,0,0.25);
+}
+
+input{
+  width:100%;
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,0.2);
+  font-size:1rem;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:14px;
+}
+.btn{
+  flex:1;
+  padding:10px;
+  border-radius:999px;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+}
+.btn.reg{background:#9ad3bc}
+.btn.log{background:#8bbcea}
+.btn.ghost{
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.25);
+}
+
+/* ================= GRID ================= */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:16px;
+  margin-top:18px;
+}
+.stall{
+  padding:18px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.35);
+  border:1px solid rgba(255,255,255,0.5);
+  text-align:center;
+  font-weight:700;
+  cursor:pointer;
+}
+.stall.visited{
+  background:rgba(150,255,180,0.45);
+  border-color:rgba(60,150,90,0.9);
+}
+
+/* ================= QR ================= */
+#qr-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:200;
+}
+#qr-reader{width:360px; max-width:94%}
+
+/* ================= TOAST ================= */
+#toast{
+  position:fixed;
+  bottom:28px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#0b2338;
+  color:#fff;
+  padding:10px 18px;
+  border-radius:999px;
+  opacity:0;
+  transition:.25s;
+}
+#toast.show{opacity:1}
+
+@media(max-width:720px){
+  .logo img{height:56px}
+  .hero-title .main{font-size:1.35rem}
+}
+</style>
+</head>
+
+<body>
+
+<div class="hero-bg"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="logo"><img src="assets/iria2025.png"></div>
+  <div class="logo"><img src="assets/cmc.png"></div>
+</div>
+
+<!-- HERO TITLE -->
+<div class="hero-title" id="heroTitle">
+  <div class="main">Welcome to the Stall Grid Contest at CMC Vellore</div>
+  <div class="sub">
+    Explore every exhibitor, scan QR codes, and complete your passport to win exciting prizes
+  </div>
+</div>
+
+<div class="hero-spacer"></div>
+
+<!-- INTRO -->
+<section class="glass-zone">
+  <div class="glass" id="verseCard">
+    <div class="verse">
+      “Even as the Son of man came not to be ministered unto, but to minister,
+      and to give his life a ransom for many.”
+      <span class="verse-ref">Matthew 20:28</span>
+    </div>
+  </div>
+
+  <div class="glass" id="idaCard">
+    <div class="ida-title">Aunt Ida’s Prayer</div>
+    <div class="ida-preview">
+      Father, whose life is within me, and whose love is ever about me…
+    </div>
+    <button class="link-btn" id="idaToggle">Read full prayer ↓</button>
+    <div id="ida-full">
+Father, whose life is within me,
+and whose love is ever about me,
+Grant that Thy life may be maintained in my life today and every day,
+as with gladness of heart, without haste or confusion of thought,
+I go about my daily tasks,
+conscious of the ability to meet every rightful demand,
+seeing the larger meaning of little things,
+and finding beauty and love everywhere.
+In the sense of Thy presence, may I walk through the hours,
+breathing the atmosphere of love rather than anxious striving...
+    </div>
+  </div>
+</section>
+
+<!-- PASSPORT -->
+<section class="passport" id="passport">
+  <div class="content">
+
+    <!-- AUTH -->
+    <div class="card" id="authCard">
+      <h3>Delegate Login</h3>
+      <input id="name" placeholder="Full Name (as per registration)">
+      <input id="email" placeholder="Email">
+      <input id="regid" placeholder="Registration ID">
+      <input id="password" type="password" placeholder="Password">
+      <div class="actions">
+        <button class="btn reg" id="register">Register</button>
+        <button class="btn log" id="login">Login</button>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="card" id="gridCard" style="display:none">
+      <h3>Stall Grid</h3>
+      <div class="grid" id="grid"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- QR -->
+<div id="qr-overlay">
+  <div id="qr-reader"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ========= HERO FADE ========= */
+const hero=document.getElementById("heroTitle");
+window.addEventListener("scroll",()=>{
+  const y=scrollY;
+  hero.style.opacity=y>240?0:1-y/240;
+  hero.style.transform=`translateX(-50%) translateY(${Math.min(y/10,20)}px)`;
+});
+
+/* ========= GLASS REVEAL ========= */
+const obs=new IntersectionObserver(e=>{
+  e.forEach(x=>x.isIntersecting&&x.target.classList.add("revealed"))
+},{threshold:.25});
+document.querySelectorAll(".glass").forEach(g=>obs.observe(g));
+
+/* ========= IDA TOGGLE ========= */
+document.getElementById("idaToggle").onclick=()=>{
+  const f=document.getElementById("ida-full");
+  f.style.display=f.style.display==="block"?"none":"block";
+};
+
+/* ========= GRID ========= */
+const grid=document.getElementById("grid");
+for(let i=1;i<=35;i++){
+  const d=document.createElement("div");
+  d.className="stall";
+  d.textContent="Stall "+i;
+  grid.appendChild(d);
+}
+</script>
+
+</body>
+</html>
