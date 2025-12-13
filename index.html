@@ -170,17 +170,25 @@
     color:#e8f8ff;
   }
 
-  #grid-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px}
+  #grid-container{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));
+  gap:16px;
+}
   .neon-stall{
-    padding:16px;
-    border-radius:14px;
-    background:rgba(255,255,255,0.18);
-    border:1px solid rgba(34,211,238,0.6);
-    color:#d8fcff; text-align:center; cursor:pointer;
-    font-weight:700;
-    backdrop-filter:blur(8px);
-    transition:transform .15s, box-shadow .15s;
-  }
+  padding:12px 8px;
+  min-height:64px;
+  border-radius:12px;
+  font-size:0.9rem;
+  font-weight:600;
+  background: rgba(255,255,255,0.30);
+  border:1px solid rgba(34,211,238,0.6);
+  color:#d8fcff;
+  text-align:center;
+  cursor:pointer;
+  backdrop-filter:blur(12px);
+  transition:transform .15s, box-shadow .15s;
+}
   .neon-stall:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,0.4)}
   .neon-stall.visited{
     background:rgba(0,60,32,0.3);
