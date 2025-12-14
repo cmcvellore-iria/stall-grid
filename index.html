@@ -444,8 +444,10 @@ async function doRegister(){
     localStorage.setItem("name", currentName);
 
     showToast("Registered & signed in");
-    updateUI();
-    await loadEverything();
+updateUI();
+buildGrid(DEFAULT_STALL_COUNT);
+await loadEverything();
+
   }catch(e){
     alert(e.error || e.message || "Registration error");
   }
@@ -474,6 +476,7 @@ async function doLogin(){
 
     showToast("Logged in");
     updateUI();
+   buildGrid(DEFAULT_STALL_COUNT);
     await loadEverything();
   }catch(e){
     alert(e.error || e.message || "Login error");
@@ -699,7 +702,6 @@ refreshLeaderboardBtn.onclick =
 updateUI();
 
 if (jwtToken && currentName) {
-  buildGrid(DEFAULT_STALL_COUNT);
   loadEverything();
 }
  
