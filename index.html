@@ -309,7 +309,11 @@
             Tap a stall tile to open the camera. Your visit is recorded instantly.
           </p>
         </div>
-        <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
+       <div style="display:flex; gap:10px;">
+  <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
+  <button class="btn-ghost" id="logoutBtn">Logout</button>
+</div>
+
       </div>
 
       <div id="user-banner" class="hidden"
@@ -386,6 +390,12 @@ const loginBtn = document.getElementById("loginBtn");
 const forgotBtn = document.getElementById("forgotBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const refreshLeaderboardBtn = document.getElementById("refreshLeaderboardBtn");
+if (logoutBtn) {
+  logoutBtn.onclick = () => {
+    localStorage.clear();
+    location.reload();
+  };
+}
 
 /* QR */
 const qrOverlay = document.getElementById("qr-overlay");
