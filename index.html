@@ -491,7 +491,7 @@ function doLogout(){
 
 /* UI STATE ------------------------------------------------------------ */
 function updateUI(){
-  const loggedIn = jwtToken && currentName;
+  const loggedIn = !!jwtToken && !!currentName;
 
   if(loggedIn){
     authCard.classList.add("hidden");
@@ -696,13 +696,11 @@ refreshLeaderboardBtn.onclick =
 
 
 /* INIT ----------------------------------------------------------------- */
-buildGrid(DEFAULT_STALL_COUNT);
+updateUI();
 
 if (jwtToken && currentName) {
-  updateUI();
+  buildGrid(DEFAULT_STALL_COUNT);
   loadEverything();
-} else {
-  updateUI();
 }
  
 </script>
