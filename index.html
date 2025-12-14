@@ -491,17 +491,19 @@ function doLogout(){
 
 /* UI STATE ------------------------------------------------------------ */
 function updateUI(){
-  if(jwtToken){
+  const loggedIn = jwtToken && currentName;
+
+  if(loggedIn){
     authCard.classList.add("hidden");
     gridCard.classList.remove("hidden");
     userBanner.classList.remove("hidden");
-    userBanner.textContent =
-      `Welcome, ${currentName}`;
+    userBanner.textContent = `Welcome, ${currentName}`;
+    document.getElementById("leaderboard").classList.remove("hidden");
   } else {
     authCard.classList.remove("hidden");
     gridCard.classList.add("hidden");
     userBanner.classList.add("hidden");
-   document.getElementById("leaderboard").classList.add("hidden");
+    document.getElementById("leaderboard").classList.add("hidden");
   }
 }
 
@@ -695,10 +697,14 @@ refreshLeaderboardBtn.onclick =
 
 /* INIT ----------------------------------------------------------------- */
 buildGrid(DEFAULT_STALL_COUNT);
-updateUI();
-if(jwtToken) loadEverything();
-else loadLeaderboard();
 
+if (jwtToken && currentName) {
+  updateUI();
+  loadEverything();
+} else {
+  updateUI();
+}
+ 
 </script>
 
 </body>
