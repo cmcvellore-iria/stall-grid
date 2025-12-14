@@ -494,19 +494,29 @@ function doLogout(){
 
 /* UI STATE ------------------------------------------------------------ */
 function updateUI(){
-  const loggedIn = !!jwtToken && !!currentName;
+  const loggedIn = Boolean(jwtToken && currentName);
 
-  if(loggedIn){
+  if (loggedIn) {
     authCard.classList.add("hidden");
     gridCard.classList.remove("hidden");
     userBanner.classList.remove("hidden");
     userBanner.textContent = `Welcome, ${currentName}`;
+
     document.getElementById("leaderboard").classList.remove("hidden");
+
+    // Build grid ONLY once, AFTER login
+    if (!gridEl.hasChildNodes()) {
+      buildGrid(DEFAULT_STALL_COUNT);
+    }
+
   } else {
     authCard.classList.remove("hidden");
     gridCard.classList.add("hidden");
     userBanner.classList.add("hidden");
     document.getElementById("leaderboard").classList.add("hidden");
+
+    // Remove grid completely when logged out
+    gridEl.innerHTML = "";
   }
 }
 
