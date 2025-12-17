@@ -185,13 +185,21 @@
   border-radius:12px;
   font-size:0.9rem;
   font-weight:600;
-  background: rgba(255,255,255,0.30);
+   
+  background: rgba(255,255,255,0.35);
   border:1px solid rgba(34,211,238,0.6);
   color:#d8fcff;
+   
   text-align:center;
   cursor:pointer;
-  backdrop-filter:blur(12px);
+   
+  backdrop-filter:blur(14px) saturate(120%); /* stronger frost */
+   -webkit-backdrop-filter: blur(14px) saturate(120%);
+   
   transition:transform .15s, box-shadow .15s;
+
+   /* bleed control — SAFE */
+  overflow:hidden;
 }
 
 .neon-stall:hover{
