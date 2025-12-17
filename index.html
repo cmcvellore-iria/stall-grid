@@ -93,24 +93,18 @@
   .verse-ref{display:block;margin-top:8px;font-size:0.9rem;opacity:0.8}
 
   .ida-title{text-align:center;font-family:"Times New Roman",serif;font-size:1.1rem;margin-bottom:6px;color:#021d2a}
-.ida-full{
-  max-height:0;
-  overflow:hidden;
-  margin-top:0;            /* key: no break */
-  font-family:"Times New Roman", Times, serif;
+.ida-preview{
+  text-align:center;
+  font-family:"Times New Roman", serif;
+  font-size:1rem;
   font-style:italic;
-  line-height:1.6;
   color:#021d2a;
-  opacity:0;
-  transition:
-    max-height .9s ease,
-    opacity .5s ease;
 }
 
  .ida-full{
   max-height:0;
   overflow:hidden;
-  margin-top:14px;
+  margin-top:0;              /* CONTINUATION */
   font-family:"Times New Roman", serif;
   font-style:italic;
   line-height:1.6;
@@ -122,7 +116,7 @@
 }
 
 .ida-full.open{
-  max-height:1400px; /* safely larger than full prayer */
+  max-height:1400px;
   opacity:1;
 }
 
