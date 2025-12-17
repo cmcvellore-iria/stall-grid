@@ -785,8 +785,14 @@ function getEmailFromJWT() {
 
 const loggedInEmail = getEmailFromJWT();
 
-if (downloadCsvBtn && loggedInEmail === "snehaljagtap.3797@gmail.com") {
-  downloadCsvBtn.classList.remove("hidden");
+if (downloadCsvBtn) {
+  // ALWAYS hide first
+  downloadCsvBtn.classList.add("hidden");
+
+  // show ONLY for admin
+  if (loggedInEmail === "snehaljagtap.3797@gmail.com") {
+    downloadCsvBtn.classList.remove("hidden");
+  }
 }
 
 if (downloadCsvBtn) {
