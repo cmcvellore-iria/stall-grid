@@ -509,6 +509,7 @@ async function doRegister(){
 
     showToast("Registered & signed in");
 updateUI();
+updateAdminUI();
 buildGrid(DEFAULT_STALL_COUNT);
 await loadEverything();
 
@@ -540,6 +541,7 @@ async function doLogin(){
 
     showToast("Logged in");
     updateUI();
+   updateAdminUI();
    buildGrid(DEFAULT_STALL_COUNT);
     await loadEverything();
   }catch(e){
@@ -573,6 +575,8 @@ function updateUI(){
       buildGrid(DEFAULT_STALL_COUNT);
     }
 
+updateAdminUI();
+   
   } else {
     authCard.classList.remove("hidden");
     gridCard.classList.add("hidden");
@@ -780,18 +784,6 @@ function getEmailFromJWT() {
     return payload.email;
   } catch {
     return null;
-  }
-}
-
-const loggedInEmail = getEmailFromJWT();
-
-if (downloadCsvBtn) {
-  // ALWAYS hide first
-  downloadCsvBtn.classList.add("hidden");
-
-  // show ONLY for admin
-  if (loggedInEmail === "snehaljagtap.3797@gmail.com") {
-    downloadCsvBtn.classList.remove("hidden");
   }
 }
 
