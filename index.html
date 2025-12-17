@@ -670,11 +670,9 @@ async function openScanner(stall){
 }
 
 async function handleQR(decoded, stallClicked){
-  let urlParams = {};
-  try { urlParams = Object.fromEntries(new URL(decoded).searchParams.entries()); }
-  catch {}
-
-  const stall = urlParams.stall || stallClicked;
+  // Parse QR text: expected format IRIA2025|<number>
+const parts = decoded.split("|");
+const stall = Number(parts[1]) || stallClicked;
 
   // Hybrid flow (static QR)
   try{
