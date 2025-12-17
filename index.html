@@ -180,28 +180,29 @@
   gap:16px;
 }
   .neon-stall{
-  padding:14px 10px;
-  min-height:96px;
+  padding:12px 8px;
+  min-height:64px;
   border-radius:12px;
-  font-size:0.90rem;
-  font-weight:610;
-  background: rgba(255,255,255,0.35);
+  font-size:0.9rem;
+  font-weight:600;
+  background: rgba(255,255,255,0.30);
   border:1px solid rgba(34,211,238,0.6);
   color:#d8fcff;
+  text-align:center;
+  cursor:pointer;
+  backdrop-filter:blur(12px);
+  transition:transform .15s, box-shadow .15s;
 }
 
-  .neon-stall:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,0.4)}
-  .neon-stall.visited{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  white-space:normal;
-  overflow:hidden;             /* 🔒 HARD STOP */
-  text-overflow:ellipsis;
-  word-break:break-word;
+.neon-stall:hover{
+  transform:translateY(-4px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.4);
+}
 
-  backdrop-filter:blur(10px);
+.neon-stall.visited{
+  background:rgba(0,60,32,0.3);
+  border-color:#4ade80;
+  color:#e9ffe9;
 }
 
   #toast{
