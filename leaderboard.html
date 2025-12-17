@@ -11,6 +11,7 @@
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
     background: #020617;
     color: #f8fafc;
+   cursor: none;
   }
 
   .wrap {
@@ -59,7 +60,7 @@
     display: flex;
     justify-content: space-between;
     padding: 12px 8px;
-    font-size: 1.05rem;
+    font-size: 1.3rem;
     border-bottom: 1px solid rgba(255,255,255,0.15);
   }
 
@@ -110,6 +111,7 @@
 </div>
 
 <script>
+ if (!location.href.startsWith("http")) location.reload();
 const API_BASE = "https://iria-stall-passport-backend.onrender.com";
 const board = document.getElementById("leaderboard");
 
