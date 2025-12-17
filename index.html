@@ -509,8 +509,7 @@ async function doRegister(){
 
     showToast("Registered & signed in");
 updateUI();
-updateAdminUI();
-buildGrid(DEFAULT_STALL_COUNT);
+   buildGrid(DEFAULT_STALL_COUNT);
 await loadEverything();
 
   }catch(e){
@@ -541,7 +540,6 @@ async function doLogin(){
 
     showToast("Logged in");
     updateUI();
-   updateAdminUI();
    buildGrid(DEFAULT_STALL_COUNT);
     await loadEverything();
   }catch(e){
@@ -563,19 +561,19 @@ function updateAdminUI() {
   const downloadCsvBtn = document.getElementById("downloadCsvBtn");
   if (!downloadCsvBtn) return;
 
-  // always hide first
+  // hide by default (always)
   downloadCsvBtn.classList.add("hidden");
 
-  try {
-    const token = localStorage.getItem("jwt");
-    if (!token) return;
+  const token = localStorage.getItem("jwt");
+  if (!token) return;
 
+  try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     if (payload.email === "snehaljagtap.3797@gmail.com") {
       downloadCsvBtn.classList.remove("hidden");
     }
   } catch {
-    // silently ignore
+    // do nothing
   }
 }
 
