@@ -369,7 +369,57 @@
 
 /* CONFIG --------------------------------------------------------------- */
 const API_BASE = "https://iria-stall-passport-backend.onrender.com";
-const DEFAULT_STALL_COUNT = 35;
+const DEFAULT_STALL_COUNT = 47;
+ const STALL_MAP = {
+  1: "Samsung",
+  2: "Philips Healthcare",
+  3: "Fujifilm",
+  4: "United Imaging",
+  5: "United Imaging",
+  6: "Cook Medical",
+  7: "Esaote India",
+  8: "Bard",
+  9: "Sequoia Healthcare",
+  10: "Vivere Imaging",
+  11: "Siemens Healthineers",
+  12: "Siemens Healthineers",
+  13: "Siemens Healthineers",
+  14: "GE Healthcare",
+  15: "Carestream",
+  16: "5C Network",
+  17: "Hologic",
+  18: "3i Medtech",
+  19: "Sanrad Medical Systems",
+  20: "Sanrad Medical Systems",
+  21: "Sanrad Medical Systems",
+  22: "Stradus",
+  23: "Mindray",
+  24: "Mindray",
+  25: "Allengers",
+  26: "Erbis Canon",
+  27: "Guerbet",
+  28: "Everrtech",
+  29: "Sonoscape",
+  30: "Sonoscape",
+  31: "BET Medical P Ltd",
+  32: "Bayer",
+  33: "Teleflex/ITPL",
+  34: "JB Chemicals",
+  35: "Terumo",
+  36: "Agfa",
+  37: "Chisom",
+  38: "CBS",
+  39: "Meditek Agencies",
+  40: "Prognosys Medical Systems",
+  41: "Lifestyle Medicine",
+  42: "Delhi Sweets",
+  43: "Karigiri",
+  44: "Ambur Leather",
+  45: "Appu Silks, Arani",
+  46: "Rehab / Just Beads",
+  47: "Jawathu Hills Co-op",
+  // add / edit freely later
+};
 
 /* ELEMENTS ------------------------------------------------------------- */
 const authCard = document.getElementById("auth-card");
@@ -548,7 +598,7 @@ function buildGrid(n = DEFAULT_STALL_COUNT){
     const stall = document.createElement("div");
     stall.className = "neon-stall";
     stall.dataset.id = i;
-    stall.innerHTML = `Stall ${i}`;
+    stall.innerHTML = STALL_MAP[i] || `Stall ${i}`;
     stall.onclick = ()=>openScanner(i);
     gridEl.appendChild(stall);
   }
