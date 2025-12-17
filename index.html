@@ -392,9 +392,15 @@ const logoutBtn = document.getElementById("logoutBtn");
 const refreshLeaderboardBtn = document.getElementById("refreshLeaderboardBtn");
 if (logoutBtn) {
   logoutBtn.onclick = () => {
-    localStorage.clear();
-    location.reload();
-  };
+  const ok = confirm(
+    "Logging out will clear your passport from this device.\n\nDo you want to continue?"
+  );
+
+  if (!ok) return;
+
+  localStorage.clear();
+  location.reload();
+};
 }
 
 /* QR */
