@@ -559,7 +559,27 @@ function doLogout(){
 
 
 /* UI STATE ------------------------------------------------------------ */
-function updateUI(){
+function updateAdminUI() {
+  const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+  if (!downloadCsvBtn) return;
+
+  // always hide first
+  downloadCsvBtn.classList.add("hidden");
+
+  try {
+    const token = localStorage.getItem("jwt");
+    if (!token) return;
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.email === "snehaljagtap.3797@gmail.com") {
+      downloadCsvBtn.classList.remove("hidden");
+    }
+  } catch {
+    // silently ignore
+  }
+}
+
+ function updateUI(){
   const loggedIn = Boolean(jwtToken && currentName);
 
   if (loggedIn) {
