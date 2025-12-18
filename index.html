@@ -331,6 +331,7 @@
        <div style="display:flex; gap:10px;">
   <button class="btn-ghost" id="refreshLeaderboardBtn">Refresh</button>
         <button class="btn-ghost hidden" id="downloadCsvBtn">Download CSV</button>
+        <button class="btn-ghost hidden" id="resetLeaderboardBtn">Reset Leaderboard</button>
   <button class="btn-ghost" id="logoutBtn">Logout</button>
 </div>
 
@@ -589,8 +590,9 @@ function updateAdminUI() {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     if (payload.email === "snehaljagtap.3797@gmail.com") {
-      downloadCsvBtn.classList.remove("hidden");
-    }
+  downloadCsvBtn.classList.remove("hidden");
+  resetLeaderboardBtn.classList.remove("hidden");
+}
   } catch {
     // do nothing
   }
@@ -812,6 +814,7 @@ refreshLeaderboardBtn.onclick =
 
  /* ADMIN CSV DOWNLOAD */
 const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+ const resetLeaderboardBtn = document.getElementById("resetLeaderboardBtn");
 
 function getEmailFromJWT() {
   try {
@@ -838,6 +841,32 @@ if (downloadCsvBtn) {
     a.href = URL.createObjectURL(blob);
     a.download = "iria_stall_passport.csv";
     a.click();
+  };
+}
+
+ const resetLeaderboardBtn = document.getElementById("resetLeaderboardBtn");
+
+if (resetLeaderboardBtn) {
+  resetLeaderboardBtn.onclick = async () => {
+    const ok = confirm(
+      "This will RESET the leaderboard for ALL users.\n\nContinue?"
+    );
+    if (!ok) return;
+
+    const res = await fetch(API_BASE + "/api/admin/reset", {
+      method: "POST",
+      headers: {
+        "admin-key": "iriaadminreset"
+      }
+    });
+
+    if (!res.ok) {
+      alert("Reset failed");
+      return;
+    }
+
+    showToast("Leaderboard reset");
+    loadLeaderboard();
   };
 }
 
