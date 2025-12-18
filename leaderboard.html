@@ -99,6 +99,7 @@
   </div>
 
   <h1>Stall Grid Contest Live Leaderboard</h1>
+ <div class="sub" id="refresh-indicator">Last updated: --</div>
 
   <div class="board" id="leaderboard">
     Loading…
@@ -121,6 +122,9 @@ async function loadLeaderboard() {
     const data = await res.json();
 
     board.innerHTML = "";
+   const now = new Date();
+document.getElementById("refresh-indicator").textContent =
+  "Last updated: " + now.toLocaleTimeString();
 
     if (!data.top || data.top.length === 0) {
       board.textContent = "No activity yet";
