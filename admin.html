@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CMC IRIA – Admin Dashboard</title>
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background:#020617;
+    color:#f8fafc;
+    padding:30px;
+  }
+
+  h1 {
+    font-size:1.4rem;
+    margin-bottom:10px;
+  }
+
+  .card {
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+  }
+
+  button {
+    padding:10px 16px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    margin-right:10px;
+  }
+
+  .btn {
+    background:#38bdf8;
+    color:#022c44;
+  }
+
+  .btn-danger {
+    background:#ef4444;
+    color:white;
+  }
+
+  .muted {
+    opacity:0.7;
+    font-size:0.9rem;
+  }
+
+  .row {
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px dashed rgba(255,255,255,0.15);
+  }
+</style>
+</head>
+
+<body>
+
+<h1>CMC IRIA – Admin Dashboard</h1>
+<p class="muted">Read-only monitoring + admin controls</p>
+
+<div class="card">
+  <button class="btn" id="refreshBtn">Refresh Leaderboard</button>
+  <button class="btn" id="downloadBtn">Download CSV</button>
+  <button class="btn-danger" id="resetBtn">Reset Leaderboard</button>
+
+  <p class="muted" id="lastUpdated" style="margin-top:12px;"></p>
+</div>
+
+<div class="card">
+  <h3>Leaderboard (Top 10)</h3>
+  <div id="leaderboard">Loading…</div>
+</div>
+
+<script>
+const API_BASE = "https://iria-stall-passport-backend.onrender.com";
+const ADMIN_EMAIL = "snehaljagtap.3797@gmail.com";
+
+/* AUTH CHECK */
+function getEmailFromJWT() {
+  try {
+    const token = localStorage.getItem("jwt");
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.email;
+  } catch {
+    return null;
+  }
+}
+
+const email = getEmailFromJWT();
+if (email !== ADMIN_EMAIL) {
+  document.body.innerHTML =
+    "<h2>Access denied</h2><p>This page is for admins only.</p>";
+  throw new Error("Not admin");
+}
+
+/* LOAD LEADERBOARD */
+async function loadLeaderboard() {
+  const box = document.getElementById("leaderboard");
+  box.textContent = "Loading…";
+
+  try {
+    const res = await fetch(API_BASE + "/api/leaderboard");
+    const data = await res.json();
+
+    box.innerHTML = "";
+    (data.top || []).forEach((u, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `<div>${i+1}. ${u.name}</div><div>${u.count}</div>`;
+      box.appendChild(row);
+    });
+
+    document.getElementById("lastUpdated").textContent =
+      "Last updated: " + new Date().toLocaleTimeString();
+
+  } catch {
+    box.textContent = "Error loading leaderboard";
+  }
+}
+
+/* BUTTONS */
+document.getElementById("refreshBtn").onclick = loadLeaderboard;
+
+document.getElementById("downloadBtn").onclick = async () => {
+  const res = await fetch(API_BASE + "/api/admin/export", {
+    headers: { Authorization: "Bearer " + localStorage.getItem("jwt") }
+  });
+  const csv = await res.text();
+  const blob = new Blob([csv], { type:"text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "iria_stall_passport.csv";
+  a.click();
+};
+
+document.getElementById("resetBtn").onclick = async () => {
+  const ok = confirm("This will RESET ALL VISITS. Continue?");
+  if (!ok) return;
+
+  const res = await fetch(API_BASE + "/api/admin/reset", {
+    method:"POST",
+    headers:{ "admin-key":"iriaadminreset" }
+  });
+
+  if (!res.ok) alert("Reset failed");
+  else {
+    alert("Leaderboard reset");
+    loadLeaderboard();
+  }
+};
+
+/* INIT */
+loadLeaderboard();
+</script>
+
+</body>
+</html>
