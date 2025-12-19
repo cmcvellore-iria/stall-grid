@@ -13,10 +13,10 @@
     padding:30px;
   }
 
-  h1 {
-    font-size:1.4rem;
-    margin-bottom:10px;
-  }
+  h1 { font-size:1.4rem; margin-bottom:6px; }
+  h2 { font-size:1.1rem; margin-bottom:8px; }
+
+  .muted { opacity:0.7; font-size:0.9rem; }
 
   .card {
     background:rgba(255,255,255,0.08);
@@ -35,20 +35,8 @@
     margin-right:10px;
   }
 
-  .btn {
-    background:#38bdf8;
-    color:#022c44;
-  }
-
-  .btn-danger {
-    background:#ef4444;
-    color:white;
-  }
-
-  .muted {
-    opacity:0.7;
-    font-size:0.9rem;
-  }
+  .btn { background:#38bdf8; color:#022c44; }
+  .btn-danger { background:#ef4444; color:white; }
 
   .row {
     display:flex;
@@ -62,18 +50,35 @@
 <body>
 
 <h1>CMC IRIA – Admin Dashboard</h1>
-<p class="muted">Read-only monitoring + admin controls</p>
+<p class="muted">Live monitoring · read-only calculations</p>
 
+<!-- CONTROLS -->
 <div class="card">
-  <button class="btn" id="refreshBtn">Refresh Leaderboard</button>
+  <button class="btn" id="refreshBtn">Refresh</button>
   <button class="btn" id="downloadBtn">Download CSV</button>
   <button class="btn-danger" id="resetBtn">Reset Leaderboard</button>
 
   <p class="muted" id="lastUpdated" style="margin-top:12px;"></p>
 </div>
 
+<!-- SUMMARY -->
 <div class="card">
-  <h3>Leaderboard (Top 10)</h3>
+  <h2>Summary</h2>
+  <div class="row">
+    <div>Total scans (all stalls)</div>
+    <div id="totalScans">–</div>
+  </div>
+</div>
+
+<!-- STALL BREAKDOWN -->
+<div class="card">
+  <h2>Stall-wise Breakdown</h2>
+  <div id="stallBreakdown">Loading…</div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="card">
+  <h2>Top 10 Participants</h2>
   <div id="leaderboard">Loading…</div>
 </div>
 
@@ -81,83 +86,116 @@
 const API_BASE = "https://iria-stall-passport-backend.onrender.com";
 const ADMIN_EMAIL = "snehaljagtap.3797@gmail.com";
 
+/* Stall names (same as index.html) */
+const STALL_MAP = {
+  1:"Samsung",2:"Philips Healthcare",3:"Fujifilm",4:"United Imaging",
+  5:"Cook Medical",6:"Esaote India",7:"Bard",8:"Sequoia Healthcare",
+  9:"Vivere Imaging",10:"Siemens Healthineers",11:"GE Healthcare",
+  12:"Carestream",13:"5C Network",14:"Hologic",15:"3i Medtech",
+  16:"Sanrad Medical Systems",17:"Stradus",18:"Mindray",19:"Allengers",
+  20:"Erbis Canon",21:"Guerbet",22:"Everrtech",23:"Sonoscape",
+  24:"BET Medical P Ltd",25:"Bayer",26:"Teleflex / ITPL",
+  27:"JB Chemicals",28:"Terumo",29:"Agfa",30:"Chisom",
+  31:"CBS",32:"Meditek Agencies",33:"Prognosys Medical Systems",
+  34:"Lifestyle Medicine",35:"Delhi Sweets",36:"Karigiri",
+  37:"Ambur Leather",38:"Appu Silks, Arani",
+  39:"Rehab / Just Beads",40:"Jawathu Hills Co-op"
+};
+
 /* AUTH CHECK */
 function getEmailFromJWT() {
   try {
     const token = localStorage.getItem("jwt");
     if (!token) return null;
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.email;
-  } catch {
-    return null;
-  }
+    return JSON.parse(atob(token.split(".")[1])).email;
+  } catch { return null; }
 }
 
-const email = getEmailFromJWT();
-if (email !== ADMIN_EMAIL) {
-  document.body.innerHTML =
-    "<h2>Access denied</h2><p>This page is for admins only.</p>";
+if (getEmailFromJWT() !== ADMIN_EMAIL) {
+  document.body.innerHTML = "<h2>Access denied</h2>";
   throw new Error("Not admin");
 }
 
-/* LOAD LEADERBOARD */
-async function loadLeaderboard() {
-  const box = document.getElementById("leaderboard");
-  box.textContent = "Loading…";
+/* LOAD ALL DATA */
+async function loadAll() {
+  const leaderBox = document.getElementById("leaderboard");
+  const stallBox = document.getElementById("stallBreakdown");
 
-  try {
-    const res = await fetch(API_BASE + "/api/leaderboard");
-    const data = await res.json();
+  leaderBox.textContent = "Loading…";
+  stallBox.textContent = "Loading…";
 
-    box.innerHTML = "";
-    (data.top || []).forEach((u, i) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      row.innerHTML = `<div>${i+1}. ${u.name}</div><div>${u.count}</div>`;
-      box.appendChild(row);
+  const res = await fetch(API_BASE + "/api/admin/export", {
+    headers:{ Authorization:"Bearer "+localStorage.getItem("jwt") }
+  });
+
+  const csv = await res.text();
+  const lines = csv.trim().split("\n").slice(1);
+
+  let totalScans = 0;
+  const stallCounts = {};
+
+  lines.forEach(line => {
+    const parts = line.split(",");
+    const stalls = (parts[3] || "").replace(/"/g,"").split(" ").filter(Boolean);
+    stalls.forEach(s => {
+      totalScans++;
+      stallCounts[s] = (stallCounts[s] || 0) + 1;
     });
+  });
 
-    document.getElementById("lastUpdated").textContent =
-      "Last updated: " + new Date().toLocaleTimeString();
+  /* Summary */
+  document.getElementById("totalScans").textContent = totalScans;
 
-  } catch {
-    box.textContent = "Error loading leaderboard";
-  }
+  /* Stall breakdown */
+  stallBox.innerHTML = "";
+  Object.keys(STALL_MAP).forEach(id => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML =
+      `<div>Stall ${id} (${STALL_MAP[id]})</div>
+       <div>${stallCounts[id] || 0}</div>`;
+    stallBox.appendChild(row);
+  });
+
+  /* Leaderboard */
+  const lb = await fetch(API_BASE + "/api/leaderboard").then(r=>r.json());
+  leaderBox.innerHTML = "";
+  lb.top.forEach((u,i)=>{
+    const r = document.createElement("div");
+    r.className="row";
+    r.innerHTML = `<div>${i+1}. ${u.name}</div><div>${u.count}</div>`;
+    leaderBox.appendChild(r);
+  });
+
+  document.getElementById("lastUpdated").textContent =
+    "Last refreshed at " + new Date().toLocaleTimeString();
 }
 
 /* BUTTONS */
-document.getElementById("refreshBtn").onclick = loadLeaderboard;
+document.getElementById("refreshBtn").onclick = loadAll;
 
-document.getElementById("downloadBtn").onclick = async () => {
+document.getElementById("downloadBtn").onclick = async ()=>{
   const res = await fetch(API_BASE + "/api/admin/export", {
-    headers: { Authorization: "Bearer " + localStorage.getItem("jwt") }
+    headers:{ Authorization:"Bearer "+localStorage.getItem("jwt") }
   });
-  const csv = await res.text();
-  const blob = new Blob([csv], { type:"text/csv" });
+  const blob = new Blob([await res.text()],{type:"text/csv"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "iria_stall_passport.csv";
   a.click();
 };
 
-document.getElementById("resetBtn").onclick = async () => {
-  const ok = confirm("This will RESET ALL VISITS. Continue?");
-  if (!ok) return;
-
-  const res = await fetch(API_BASE + "/api/admin/reset", {
-    method:"POST",
-    headers:{ "admin-key":"iriaadminreset" }
+document.getElementById("resetBtn").onclick = async ()=>{
+  if(!confirm("Reset ALL visits?")) return;
+  await fetch(API_BASE + "/api/admin/reset", {
+    method:"POST", headers:{ "admin-key":"iriaadminreset" }
   });
-
-  if (!res.ok) alert("Reset failed");
-  else {
-    alert("Leaderboard reset");
-    loadLeaderboard();
-  }
+  alert("Reset done");
+  loadAll();
 };
 
 /* INIT */
-loadLeaderboard();
+loadAll();
 </script>
 
 </body>
