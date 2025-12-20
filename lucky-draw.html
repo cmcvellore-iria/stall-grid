@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CMC IRIA – Lucky Draw</title>
+
+<style>
+  body{
+    margin:0;
+    height:100vh;
+    background:#020617;
+    color:#f8fafc;
+    font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(800px 400px at 20% 10%, rgba(56,189,248,0.15), transparent 60%),
+      radial-gradient(600px 300px at 80% 80%, rgba(34,197,94,0.12), transparent 60%);
+    z-index:-1;
+  }
+
+  .wrap{
+    text-align:center;
+    padding:40px 50px;
+    border-radius:22px;
+    background:rgba(255,255,255,0.10);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:0 30px 60px rgba(0,0,0,0.45);
+    min-width:520px;
+  }
+
+  .logos{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+  }
+
+  .logos img{
+    height:64px;
+  }
+
+  h1{
+    font-size:2rem;
+    margin:10px 0 6px;
+  }
+
+  .sub{
+    opacity:0.8;
+    margin-bottom:30px;
+  }
+
+  #slot{
+    font-size:2.1rem;
+    font-weight:700;
+    padding:28px 36px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.3);
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:box-shadow .3s, color .3s;
+  }
+
+  #slot.winner{
+    color:#22c55e;
+    box-shadow:0 0 40px rgba(34,197,94,0.9);
+  }
+
+  button{
+    margin-top:34px;
+    padding:14px 34px;
+    font-size:1.05rem;
+    font-weight:700;
+    border-radius:999px;
+    border:none;
+    background:#38bdf8;
+    color:#022c44;
+    cursor:pointer;
+  }
+
+  button:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+  }
+
+  .confetti{
+    position:fixed;
+    width:8px;
+    height:8px;
+    top:-10px;
+    animation:fall linear forwards;
+  }
+
+  @keyframes fall{
+    to{
+      transform:translateY(110vh) rotate(720deg);
+      opacity:0;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="logos">
+    <img src="assets/iria2025.png" alt="IRIA">
+    <img src="assets/cmc.png" alt="CMC">
+  </div>
+
+  <h1>🎉 Lucky Draw 🎉</h1>
+  <div class="sub">CMC IRIA Stall Grid Contest</div>
+
+  <div id="slot">Ready</div>
+
+  <button id="spinBtn" onclick="spin()">SPIN</button>
+
+</div>
+
+<script>
+/* =====================================================
+   COMPLETED ALL STALLS – ELIGIBLE PARTICIPANTS
+   ===================================================== */
+const names = [
+  "Ben Roshan",
+  "Reina Jerusha",
+  "Kabir Khader Eliyas",
+  "Steven Lionel",
+  "Dhinesh Kumar S",
+  "Jagdeesh",
+  "Deepthi Rekha",
+  "Janet Vinoline",
+  "Joshua R",
+  "Gopinathan",
+  "Cynthia Susan John",
+  "Shreyosi Santra",
+  "Rashi Goyal",
+  "Lingala Joel Prathap Raju",
+  "Arun S R",
+  "Prajesh Adhiban",
+  "SHYJUMON GEORGE",
+  "Reettika Chanda",
+  "Pavithkumar S",
+  "Kalaipradha",
+  "Namitha Varghese",
+  "WANBOKLANG NONGSIEJ"
+];
+/* ===================================================== */
+
+const slot = document.getElementById("slot");
+const btn = document.getElementById("spinBtn");
+let timer;
+
+function spin(){
+  if(names.length === 0){
+    alert("No names loaded");
+    return;
+  }
+
+  btn.disabled = true;
+  slot.classList.remove("winner");
+
+  let ticks = 0;
+  let speed = 80;
+
+  timer = setInterval(()=>{
+    slot.textContent = names[Math.floor(Math.random()*names.length)];
+    ticks++;
+
+    if(ticks > 25) speed += 18;
+    if(ticks > 42){
+      clearInterval(timer);
+      declareWinner(slot.textContent);
+    }
+  }, speed);
+}
+
+function declareWinner(name){
+  slot.textContent = name;
+  slot.classList.add("winner");
+  launchConfetti();
+}
+
+function launchConfetti(){
+  for(let i=0;i<120;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.background = `hsl(${Math.random()*360},80%,60%)`;
+    c.style.animationDuration = (2 + Math.random()*2) + "s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+</script>
+
+</body>
+</html>
