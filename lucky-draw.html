@@ -248,7 +248,24 @@ names.forEach(n=>{
   nameEls[n] = d;
 });
 
-btn.onclick = spin;
+let audioUnlocked = false;
+
+btn.onclick = () => {
+  if (!audioUnlocked) {
+    drum.play().then(() => {
+      drum.pause();
+      drum.currentTime = 0;
+      boom.play().then(() => {
+        boom.pause();
+        boom.currentTime = 0;
+        audioUnlocked = true;
+        spin(); // now do the real spin
+      });
+    }).catch(()=>{});
+  } else {
+    spin();
+  }
+};
 
 function spin(){
   if(remaining.length === 0){
