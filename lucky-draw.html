@@ -190,6 +190,14 @@
 
 </div>
 
+  <audio id="drum"
+       src="https://assets.mixkit.co/sfx/preview/mixkit-drum-roll-566.mp3"
+       preload="auto"></audio>
+
+<audio id="boom"
+       src="https://assets.mixkit.co/sfx/preview/mixkit-firework-burst-2810.mp3"
+       preload="auto"></audio>
+
 <script>
 /* =====================================================
    ELIGIBLE PARTICIPANTS (COMPLETED ALL 35)
@@ -226,6 +234,9 @@ let remaining = [...names];
 const slot = document.getElementById("slot");
 const btn = document.getElementById("spinBtn");
 const listEl = document.getElementById("nameList");
+  const drum = document.getElementById("drum");
+const boom = document.getElementById("boom");
+
 
 /* Build side list */
 const nameEls = {};
@@ -247,6 +258,11 @@ function spin(){
 
   btn.disabled = true;
   slot.classList.remove("winner");
+  // 🔊 Start drum roll
+drum.currentTime = 0;
+drum.volume = 0.6;
+drum.play().catch(()=>{});
+
 
   let ticks = 0;
   let speed = 80;
@@ -259,15 +275,26 @@ function spin(){
 
     if(ticks > 25) speed += 18;
     if(ticks > 42){
-      clearInterval(timer);
-      declareWinner(current);
-    }
+  clearInterval(timer);
+
+  // 🔊 Stop drum roll
+  drum.pause();
+  drum.currentTime = 0;
+
+  declareWinner(current);
+}
+
   }, speed);
 }
 
 function declareWinner(name){
   slot.textContent = name;
   slot.classList.add("winner");
+  // 🔊 Firework sound
+boom.currentTime = 0;
+boom.volume = 0.7;
+boom.play().catch(()=>{});
+
   launchConfetti();
 
   const el = nameEls[name];
@@ -290,6 +317,7 @@ function launchConfetti(){
     setTimeout(()=>c.remove(),4000);
   }
 }
+
 </script>
 
 </body>
